@@ -1,31 +1,7 @@
-# --- Python General ---
-__pycache__/
-*.py[cod]
-*$py.class
-
-# --- Entornos Virtuales ---
-# (Dependiendo de cómo hayas llamado a tu carpeta)
 venv/
-env/
-.venv/
-
-# --- Base de Datos SQLite ---
-# ¡CRUCIAL! No subimos la DB porque cambia localmente
-*.db
-*.sqlite3
-data/*.db
-
-# --- Documentación Sphinx ---
-# Solo subimos el código fuente, no la página web generada
-docs/build/
-
-# --- Testing ---
+__pycache__/
+*.pyc
 .pytest_cache/
-
-# --- Archivos de Sistema Operativo ---
+data/*.db
 .DS_Store
-Thumbs.db
-
-# --- Configuración de IDEs (Opcional) ---
-.vscode/
-.idea/
+docs/build/
