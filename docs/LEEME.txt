@@ -1,4 +1,0 @@
-Para iniciar la documentación:
-1. Abre una terminal en esta carpeta.
-2. Ejecuta: sphinx-quickstart
-3. Sigue las instrucciones en pantalla.
