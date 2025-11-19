@@ -1,23 +1,27 @@
 .. Material Database documentation master file.
 
-Documentación del Software de Materiales
-========================================
+Documentación de Labterial
+==========================
 
-Bienvenido a la documentación técnica del proyecto. Este software permite la gestión
-de una base de datos de materiales de ingeniería y la simulación de sus propiedades
-mecánicas (Tensión, Compresión, Torsión).
+Software de simulación de ensayos mecánicos y gestión de materiales de ingeniería.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contenidos:
+   :caption: Manual:
 
+   user_guide
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API Referencia:
+
+   modules/app
    modules/physics
    modules/database
-   modules/app
+   modules/cli
 
-Indices y tablas
-==================
+Indices
+=======
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`

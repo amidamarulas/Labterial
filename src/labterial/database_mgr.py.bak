@@ -3,21 +3,13 @@ import pandas as pd
 import os
 from pathlib import Path
 
-# Definir ruta segura para la base de datos (compatible con pip install)
+# Definir ruta segura en el directorio del usuario
 USER_DATA_DIR = Path.home() / ".labterial"
 DB_PATH = USER_DATA_DIR / 'materials.db'
 
 def init_db():
     """
-    Inicializa la conexión con la base de datos SQLite y crea la estructura de tablas.
-
-    Esta función verifica si existe la carpeta de configuración del usuario 
-    (``~/.labterial``). Si no existe, la crea. Posteriormente conecta a SQLite
-    y genera la tabla ``materials`` si no está presente.
-
-    Note:
-        Si la base de datos está vacía, esta función inserta automáticamente
-        datos semilla (ejemplos iniciales) para que la aplicación no arranque en blanco.
+    Inicializa la DB en la carpeta del usuario (~/.labterial/).
     """
     # Crear carpeta si no existe
     if not USER_DATA_DIR.exists():
@@ -40,6 +32,7 @@ def init_db():
     # Semilla inicial
     c.execute('SELECT count(*) FROM materials')
     if c.fetchone()[0] == 0:
+        # Datos por defecto
         try:
             data = [
                 ('Acero A36', 'Metal', 200000, 250, 400, 0.26),
@@ -52,16 +45,6 @@ def init_db():
     conn.close()
 
 def get_all_materials():
-    """
-    Recupera el inventario completo de materiales.
-
-    Ejecuta una consulta SQL ``SELECT *`` sobre la tabla de materiales y
-    convierte el resultado directamente a un DataFrame de Pandas.
-
-    Returns:
-        pd.DataFrame: Un DataFrame con las columnas:
-        ``id``, ``name``, ``category``, ``elastic_modulus``, ``yield_strength``, etc.
-    """
     init_db()
     conn = sqlite3.connect(str(DB_PATH))
     df = pd.read_sql_query("SELECT * FROM materials", conn)
@@ -69,23 +52,6 @@ def get_all_materials():
     return df
 
 def insert_from_dataframe(df):
-    """
-    Inserta masivamente nuevos materiales desde un DataFrame.
-
-    Utilizada principalmente para la importación de archivos CSV. Realiza validaciones
-    de columnas requeridas antes de intentar la inserción.
-
-    Args:
-        df (pd.DataFrame): DataFrame que debe contener al menos las columnas:
-            ``name``, ``category``, ``elastic_modulus``, ``yield_strength``.
-
-    Returns:
-        tuple: Una tupla ``(added, ignored, error)`` donde:
-        
-        * **added (int):** Número de filas insertadas exitosamente.
-        * **ignored (int):** Número de filas omitidas (por duplicidad de nombre).
-        * **error (str):** Mensaje de error si falla la validación de estructura (o None).
-    """
     init_db()
     conn = sqlite3.connect(str(DB_PATH))
     cursor = conn.cursor()
@@ -93,7 +59,7 @@ def insert_from_dataframe(df):
     
     req = ['name', 'category', 'elastic_modulus', 'yield_strength']
     for r in req:
-        if r not in df.columns: return 0, 0, f"Falta columna requerida: {r}"
+        if r not in df.columns: return 0, 0, f"Falta columna: {r}"
         
     for _, row in df.iterrows():
         try:
@@ -105,3 +71,6 @@ def insert_from_dataframe(df):
             
     conn.commit(); conn.close()
     return added, ignored, None
+
+def get_db_path():
+    return str(DB_PATH)

@@ -4,48 +4,38 @@ import plotly.express as px
 import os
 import sys
 
-# --- BLOQUE DE IMPORTACIÓN ---
+# --- BLOQUE DE IMPORTACIÓN A PRUEBA DE BALAS ---
+# 1. Obtenemos la carpeta donde vive este archivo (app.py)
 current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# 2. Agregamos esa carpeta al 'path' de Python para que encuentre los archivos vecinos
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
+# 3. Importación Híbrida
 try:
+    # Intento A: Modo Paquete Instalado (ej: material-lab)
+    # Usa sintaxis relativa (.)
     from .database_mgr import get_all_materials, insert_from_dataframe
     from .physics import simular_ensayo
 except ImportError:
+    # Intento B: Modo Script Directo (ej: streamlit run app.py)
+    # Como ya agregamos el 'current_dir' al path, importamos SIN PUNTOS
     from database_mgr import get_all_materials, insert_from_dataframe
     from physics import simular_ensayo
-# -----------------------------
+
+# -----------------------------------------------
 
 def configure_page():
-    """
-    Configura los metadatos de la página de Streamlit.
-    
-    Establece el título del navegador, el favicon y el modo de diseño (Wide mode).
-    """
     st.set_page_config(page_title="Lab Materiales", layout="wide")
     st.title("🏗️ Simulador Universal de Ensayos")
 
 def load_data():
-    """
-    Wrapper para cargar datos desde la base de datos.
-    
-    Returns:
-        pd.DataFrame: Datos de materiales.
-    """
     return get_all_materials()
 
 def render_sidebar(df_raw):
-    """
-    Genera la barra lateral con los filtros de categoría.
-
-    Args:
-        df_raw (pd.DataFrame): El set de datos completo.
-
-    Returns:
-        pd.DataFrame: El set de datos filtrado según la selección del usuario.
-    """
     st.sidebar.header("Base de Datos")
+    # Validación de seguridad por si el DF viene vacío o sin columnas
     if isinstance(df_raw, pd.DataFrame) and 'category' in df_raw.columns:
         cats = df_raw['category'].unique().tolist()
         sel_cats = st.sidebar.multiselect("Filtros", cats, default=cats)
@@ -54,18 +44,6 @@ def render_sidebar(df_raw):
     return df_raw
 
 def render_tab_management(df_mats):
-    """
-    Renderiza la **Pestaña 1: Gestión**.
-    
-    Incluye:
-    
-    1. Tabla interactiva de materiales.
-    2. Widget de carga de archivos CSV.
-    3. Botón de descarga de respaldo de la base de datos.
-
-    Args:
-        df_mats (pd.DataFrame): Datos a mostrar en la tabla.
-    """
     c1, c2 = st.columns([3,1])
     with c1:
         st.subheader("Inventario")
@@ -81,28 +59,27 @@ def render_tab_management(df_mats):
                     else: st.success(f"Ok: {a}"); st.rerun()
                 except Exception as ex:
                     st.error(f"Error CSV: {ex}")
+        
         st.divider()
+        # Backup DB
         try:
             from pathlib import Path
+            # Lógica para encontrar la DB en diferentes entornos
             pkg = __package__ if __package__ else 'labterial'
+            # 1. Ruta de usuario (~/.labterial)
             db_path = Path.home() / f".{pkg}" / "materials.db"
+            
+            # 2. Si no existe, buscar relativa al script (Entorno Dev)
             if not db_path.exists():
+                # src/labterial -> src -> root -> data
                 db_path = Path(__file__).parent.parent.parent / 'data' / 'materials.db'
+
             if db_path.exists():
                 with open(db_path, "rb") as fp:
                     st.download_button("💾 Backup BD", fp, "materials.db")
         except: pass
 
 def render_tab_simulation(df_mats):
-    """
-    Renderiza la **Pestaña 2: Simulación**.
-
-    Maneja la lógica de selección de material, configuración del slider de deformación
-    y renderizado de la gráfica de Plotly.
-
-    Args:
-        df_mats (pd.DataFrame): Materiales disponibles para el dropdown.
-    """
     if df_mats.empty: st.warning("Sin datos."); return
 
     st.header("Ensayo Mecánico")
@@ -141,15 +118,6 @@ def render_tab_simulation(df_mats):
         st.plotly_chart(fig, use_container_width=True)
 
 def render_tab_reports(df_mats):
-    """
-    Renderiza la **Pestaña 3: Reportes**.
-    
-    Permite seleccionar subconjuntos de datos y propiedades para exportar
-    a CSV o generar tablas en formato LaTeX.
-
-    Args:
-        df_mats (pd.DataFrame): Datos base.
-    """
     st.header("Reportes")
     if df_mats.empty: return
 
@@ -173,11 +141,6 @@ def render_tab_reports(df_mats):
             except: st.error("Error generando LaTeX")
 
 def main():
-    """
-    Función principal (Entry Point).
-    
-    Orquesta la ejecución de la aplicación llamando a las funciones de renderizado.
-    """
     configure_page()
     try:
         df_raw = load_data()
