@@ -4,7 +4,7 @@ import sys
 # --- CONFIGURACIÓN DE RUTA ---
 # conf.py está en docs/source/
 # src/ está en ../../src/
-sys.path.insert(0, os.path.abspath('../../src'))
+sys.path.insert(0, os.path.abspath('../../src/labterial'))
 
 # --- INFORMACIÓN DEL PROYECTO ---
 project = 'Material Database'

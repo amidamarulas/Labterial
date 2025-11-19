@@ -5,11 +5,11 @@ import os
 
 # Intentos de importación para manejar ejecución local vs Sphinx
 try:
-    from database_mgr import get_all_materials, insert_from_dataframe
-    from physics import simular_ensayo
+    from .database_mgr import get_all_materials, insert_from_dataframe
+    from .physics import simular_ensayo
 except ImportError:
-    from src.database_mgr import get_all_materials, insert_from_dataframe
-    from src.physics import simular_ensayo
+    from .database_mgr import get_all_materials, insert_from_dataframe
+    from .physics import simular_ensayo
 
 def configure_page():
     """
