@@ -1,10 +1,11 @@
 Interfaz Gráfica (Streamlit)
 ============================
 
-El archivo principal de la aplicación.
+Este módulo gestiona la interfaz de usuario. Al ejecutarse con streamlit run,
+la función :func:`main` orquesta el renderizado de las pestañas.
 
-.. note::
-   Este módulo es ejecutado por Streamlit y contiene la definición de la UI.
-   
-   Para ejecutar: `streamlit run src/app.py`
+.. automodule:: app
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
