@@ -1,3 +1,11 @@
+#!/bin/bash
+
+# Ruta exacta basada en tu error log
+TARGET_FILE="src/labterial/app.py"
+
+echo "🚑 Aplicando parches de emergencia en: $TARGET_FILE"
+
+cat << 'EOF' > $TARGET_FILE
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -157,3 +165,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+EOF
+
+echo "✅ Corrección aplicada."
+echo "Intenta ejecutar de nuevo: material-lab"

@@ -1,7 +1,18 @@
-venv/
+# Python
 __pycache__/
 *.pyc
+venv/
+.env
 .pytest_cache/
+
+# Base de Datos (No se debe subir, cada usuario genera la suya)
+*.db
 data/*.db
-.DS_Store
+src/material_simulator/*.db
+
+# Documentación
 docs/build/
+
+# Distribución
+dist/
+*.egg-info/
