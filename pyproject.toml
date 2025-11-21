@@ -1,32 +1,39 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "material-database-lab"  # CAMBIA ESTO SI EL NOMBRE YA EXISTE EN PYPI
-version = "0.1.0"
+name = "labterial-sim"  # <-- CAMBIA ESTO SI EL NOMBRE ESTÁ OCUPADO EN PYPI
+version = "1.2.0"
+description = "Suite de simulación de ensayos mecánicos y gestión de materiales."
+readme = "README.md"
 authors = [
   { name="Tu Nombre", email="tu@email.com" },
 ]
-description = "Una suite interactiva para simulacion de materiales y ensayos mecanicos"
-readme = "README.md"
+license = {file = "LICENSE"}
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Framework :: Streamlit"
 ]
 dependencies = [
-    "streamlit",
-    "pandas",
-    "plotly",
-    "numpy",
-    "scipy"
+    "streamlit>=1.20.0",
+    "pandas>=1.5.0",
+    "plotly>=5.13.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0"
 ]
 
-[project.scripts]
-# Esto crea el comando magico en la terminal
-material-lab = "labterial.cli:main"
-
 [project.urls]
-"Homepage" = "https://github.com/tu-usuario/tu-repo"
+"Homepage" = "https://github.com/amidamarulas/Labterial"
+"Bug Tracker" = "https://github.com/amidamarulas/Labterial/issues"
+
+[project.scripts]
+# Esto crea el comando mágico en la terminal
+labterial = "labterial.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

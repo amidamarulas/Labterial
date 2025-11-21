@@ -27,16 +27,38 @@ LABEL_MAP = {
 }
 
 def translate_df(df):
+    """Ayuda interna para renombrar columnas técnicas a nombres legibles en Español."""
     return df.rename(columns=LABEL_MAP)
 
 def configure_page():
+    """
+    Configura los parámetros iniciales de la aplicación Streamlit.
+    
+    Establece el título de la pestaña, el favicon y el modo 'wide' para aprovechar
+    toda la pantalla.
+    """
     st.set_page_config(page_title="Labterial Edu", layout="wide", page_icon="🧪")
     st.title("🧪 Labterial: Suite de Ingeniería")
 
 def load_data():
+    """Wrapper para cargar la base de datos completa."""
     return get_all_materials()
 
 def render_sidebar(df_raw):
+    """
+    Renderiza la barra lateral de navegación y configuración global.
+
+    Incluye:
+    
+    *   Filtros por Categoría de material.
+    *   Controles del **Modo Profesor** (Checkbox para ecuaciones).
+
+    Args:
+        df_raw (pd.DataFrame): DataFrame base con todos los materiales.
+
+    Returns:
+        tuple: (DataFrame filtrado, booleano show_math).
+    """
     st.sidebar.header("🔍 Filtros")
     st.sidebar.divider()
     st.sidebar.subheader("👨‍🏫 Modo Profesor")
@@ -49,6 +71,15 @@ def render_sidebar(df_raw):
     return df_raw, show_math
 
 def render_tab_management(df_mats):
+    """
+    Renderiza la Pestaña 1: Gestión de Inventario.
+
+    Permite visualizar la tabla de materiales, cargar nuevos datos vía CSV
+    y descargar copias de seguridad de la base de datos SQLite.
+
+    Args:
+        df_mats (pd.DataFrame): Datos a mostrar.
+    """
     c1, c2 = st.columns([2, 1])
     with c1:
         st.subheader("📋 Inventario")
@@ -73,140 +104,84 @@ def render_tab_management(df_mats):
                 with open(db_path, "rb") as fp: st.download_button("💾 Backup BD", fp, "materials.db")
         except: pass
 
-# --- FUNCIÓN PEDAGÓGICA EXPANDIDA ---
 def render_math_explainer(dat, modo, units, factor, unit_label, geom_params=None):
+    """
+    Componente pedagógico que renderiza explicaciones físicas y matemáticas dinámicas.
+
+    Se adapta según el tipo de ensayo (Tensión, Flexión, etc.) para mostrar
+    las fórmulas correctas (Hooke, Von Mises, Escuadría) y explicar los fenómenos
+    físicos subyacentes.
+
+    Args:
+        dat (Series): Propiedades del material seleccionado.
+        modo (str): Tipo de ensayo actual.
+        units (str): Nombre del sistema de unidades.
+        factor (float): Factor de conversión de unidades.
+        geom_params (tuple, optional): Dimensiones (L, b, d) si es Flexión.
+    """
     E = dat['elastic_modulus'] * factor
     Sy = dat['yield_strength'] * factor
-    Su = dat['ultimate_strength'] * factor
     
-    st.info(f"📘 **Análisis Físico-Matemático Detallado: {modo}**")
-    
-    t1, t2 = st.tabs(["1. Mecánica Elástica (Lineal)", "2. Plasticidad y Falla (No Lineal)"])
+    st.info(f"📘 **Fundamentos Físicos: {modo}**")
+    t1, t2 = st.tabs(["1. Mecánica Elástica", "2. Análisis de Falla"])
     
     if modo == "Flexion":
         L, b, d = geom_params if geom_params else (100, 10, 5)
-        # Inercia rectangular
         I = (b * d**3) / 12
-        
         with t1:
             c_txt, c_eq = st.columns([3, 2])
             with c_txt:
-                st.markdown("### 📐 Teoría de la Viga (Euler-Bernoulli)")
-                st.markdown("""
-                En la flexión, el material no se estira uniformemente. Existe un **Eje Neutro** en el centro que no sufre deformación.
-                *   Las fibras superiores se **comprimen**.
-                *   Las fibras inferiores se **traccionan**.
-                
-                La resistencia depende de la **Inercia ($I$)**, que es la oposición geométrica a rotar. Nota que la altura ($d$) está elevada al cubo ($d^3$), por lo que aumentar el espesor es la forma más eficiente de ganar rigidez.
-                """)
-                st.caption(f"Momento de Inercia calculado: $I = {I:,.1f} \\text{{ mm}}^4$")
+                st.markdown("**Flexión de 3 Puntos:**")
+                st.markdown(f"La pendiente depende de la geometría ($I$):")
+                st.caption(f"Inercia I = {I:.1f} mm⁴")
             with c_eq:
-                st.markdown("#### Esfuerzo Máximo (Fórmula de la Escuadría)")
-                st.latex(r"\sigma_{max} = \frac{M \cdot c}{I} \Rightarrow \frac{3 \cdot F \cdot L}{2 \cdot b \cdot d^2}")
-                st.markdown("#### Deflexión Máxima")
-                st.latex(r"\delta = \frac{F \cdot L^3}{48 \cdot E \cdot I}")
-        
+                st.markdown("#### Relación Fuerza-Esfuerzo")
+                st.latex(r"F = \frac{2 \cdot \sigma \cdot b \cdot d^2}{3 \cdot L}")
         with t2:
-            st.markdown("### 💥 Módulo de Ruptura (MOR)")
-            st.markdown(f"""
-            Aunque el material es el mismo que en tracción, en flexión suele aguantar una carga aparente mayor (**{1.2*Su:.0f} {unit_label}** vs {Su:.0f} {unit_label}).
-            
-            **¿Por qué?** En tracción pura, todo el volumen está al límite, así que cualquier defecto interno causa la falla. 
-            En flexión, solo una "piel" delgada inferior está al esfuerzo máximo, reduciendo estadísticamente la probabilidad de que un defecto crítico esté justo ahí (Mecánica de Fractura Probabilística).
-            
-            **La Caída Final:** La gráfica baja porque se inicia una grieta en la cara inferior que se propaga hacia arriba, reduciendo la sección efectiva de la viga ($d$ disminuye).
-            """)
+            st.markdown("**Deflexión ($\delta$):**")
+            st.latex(r"\delta = \frac{\epsilon \cdot L^2}{6 \cdot d}")
 
     elif modo == "Torsion":
-        Nu = dat.get('poisson_ratio', 0.3)
-        G = E / (2 * (1 + Nu))
-        Ty = Sy * 0.577
-        
+        G = E / (2 * (1 + dat.get('poisson_ratio', 0.3)))
         with t1:
-            c_txt, c_eq = st.columns([3, 2])
-            with c_txt:
-                st.markdown("### 🔄 Cizalladura Pura (Shear)")
-                st.markdown("""
-                Imagina el material como un mazo de cartas. En torsión, no estamos separando las cartas (tracción), sino **deslizándolas** unas sobre otras.
-                
-                La rigidez que gobierna esto no es $E$, sino el **Módulo de Cortante ($G$)**. Para materiales isotrópicos, $G$ está matemáticamente ligado a $E$ a través del Coeficiente de Poisson ($\\nu$).
-                """)
-                st.caption(f"Relación Elástica: $G \\approx 0.38 E$ (para metales típicos)")
-                st.markdown(f"**Calculado:** $G = {G:,.0f} \\text{{ {unit_label} }}$")
-            with c_eq:
-                st.markdown("#### Ley de Hooke (Corte)")
-                st.latex(r"\tau = G \cdot \gamma")
-                st.markdown("""
-                * $\\tau$: Esfuerzo Cortante
-                * $G$: Módulo de Rigidez
-                * $\gamma$: Deformación Angular
-                """)
+            st.markdown("**Cizalladura:** Deslizamiento de planos.")
+            st.caption(f"Módulo de Corte G ≈ {G:,.0f} {unit_label}")
+            st.latex(r"\tau = G \cdot \gamma")
         with t2:
-            st.markdown("### ⚡ Criterio de Falla de Von Mises")
-            st.markdown(f"""
-            ¿Cuándo deja de ser elástico el material si lo retuerces?
-            La **Teoría de la Energía de Distorsión** (Von Mises) establece que el material fluye cuando la energía de deformación alcanza un límite crítico.
-            
-            Matemáticamente, esto predice que la resistencia al corte es el **57.7%** de la resistencia a la tracción.
-            """)
-            st.latex(r"\tau_{yield} = \frac{\sigma_{yield}}{\sqrt{3}} \approx 0.577 \cdot \sigma_{yield}")
-            st.markdown(f"Por eso, tu límite elástico estimado baja de **{Sy:.0f}** a **{Ty:.0f} {unit_label}**.")
+            st.markdown("Criterio Von Mises:")
+            st.latex(r"\tau_{y} \approx 0.577 \cdot \sigma_{y}")
 
     elif modo == "Compresion":
         with t1:
-            c_txt, c_eq = st.columns([3, 2])
-            with c_txt:
-                st.markdown("### 🧱 Efecto Poisson y Fricción")
-                st.markdown(f"""
-                Al aplastar el material, los átomos se acercan. Por conservación de volumen (aproximada), el material trata de expandirse hacia los lados.
-                
-                El **Coeficiente de Poisson ($\\nu = {dat.get('poisson_ratio', 0.3)}$)** dicta qué tanto se "engorda" la probeta.
-                * $\\nu = 0.5$: Volumen constante (Gomas).
-                * $\\nu = 0.3$: Metales típicos.
-                * $\\nu = 0.0$: Corcho (no se ensancha).
-                """)
-            with c_eq:
-                st.markdown("#### Ley Constitutiva")
-                st.latex(r"\sigma_{axial} = - E \cdot \epsilon_{axial}")
-                st.latex(r"\epsilon_{transversal} = - \nu \cdot \epsilon_{axial}")
-        
+            st.markdown("**Acortamiento:**")
+            st.latex(r"\sigma = - E \cdot \epsilon")
         with t2:
-            st.markdown("### 📈 ¿Por qué no baja la gráfica?")
-            st.markdown("""
-            A diferencia de la tracción, donde se forma un cuello que debilita la pieza (**Estricción**), en compresión ocurre lo contrario: el **Abarrilamiento**.
-            
-            1.  El área transversal aumenta ($A > A_0$).
-            2.  Como $\sigma = F/A_0$ (Esfuerzo Ingenieril), y el material real se vuelve más denso y fuerte por endurecimiento, la máquina necesita cada vez más fuerza.
-            3.  No hay un punto de inestabilidad geométrica en materiales dúctiles; simplemente se aplastan hasta ser una lámina.
-            """)
+            st.markdown("Sin estricción, el esfuerzo aparente sube indefinidamente.")
 
-    else: # Tension (Tracción)
+    else: # Tension
         with t1:
-            c_txt, c_eq = st.columns([3, 2])
-            with c_txt:
-                st.markdown("### 🔗 Fuerzas Interatómicas")
-                st.markdown("""
-                En la zona lineal, estamos estirando los enlaces químicos (metálicos, covalentes) sin romperlos. Es como estirar millones de resortes microscópicos.
-                
-                La pendiente de esta recta, el **Módulo de Young ($E$)**, es una medida directa de la fuerza de esos enlaces químicos. Por eso el Tungsteno (enlaces fuertes) tiene un $E$ alto y los polímeros (enlaces débiles) un $E$ bajo.
-                """)
-                st.caption(f"Rigidez medida: $E = {E:,.0f} \\text{{ {unit_label} }}$")
-            with c_eq:
-                st.markdown("#### Ley de Hooke Uniaxial")
-                st.latex(r"\sigma = E \cdot \epsilon")
-        
+            st.markdown("**Tracción Uniaxial:**")
+            st.latex(r"\sigma = E \cdot \epsilon")
         with t2:
-            st.markdown("### 🔨 Dislocaciones y Endurecimiento")
-            st.markdown(f"""
-            Cuando pasamos el límite **Sy** ({Sy:.0f} {unit_label}), ocurren deslizamientos irreversibles en la estructura cristalina (movimiento de dislocaciones).
-            
-            **Endurecimiento por Deformación:** Curiosamente, deformar el metal lo hace más fuerte al principio (la curva sube). Las dislocaciones se "enredan" entre sí, dificultando el movimiento posterior.
-            
-            **Estricción (Necking):** Al llegar a **Su** ({Su:.0f} {unit_label}), el endurecimiento ya no puede compensar la reducción de área. Se forma un cuello local y la carga cae hasta la fractura.
-            """)
-            st.latex(r"\sigma_{plastica} = K \cdot \epsilon^n")
+            st.markdown("Ley de Hollomon:")
+            st.latex(r"\sigma = K \cdot \epsilon^n")
 
 def render_tab_simulation(df_mats, show_math):
+    """
+    Renderiza la Pestaña 2: Laboratorio Virtual.
+
+    Esta función es el núcleo de la aplicación. Gestiona:
+    
+    1.  **Configuración:** Selección de unidades, materiales y tipo de ensayo.
+    2.  **Motor de Simulación:** Llama a ``physics.py`` para cada material.
+    3.  **Visualización:** Genera gráficas interactivas con Plotly.
+    4.  **Benchmarking:** Genera gráficas de barras comparativas.
+    5.  **Pedagogía:** Llama al explicador matemático si está activo.
+
+    Args:
+        df_mats (pd.DataFrame): Materiales disponibles.
+        show_math (bool): Si es True, muestra el panel educativo.
+    """
     if df_mats.empty: st.warning("Sin datos."); return
     st.header("🔬 Laboratorio Virtual")
     col_ctrl, col_plot = st.columns([1, 3])
@@ -227,6 +202,7 @@ def render_tab_simulation(df_mats, show_math):
         modo = st.radio("Ensayo", ["Tension", "Compresion", "Torsion", "Flexion"])
         
         slider_max_def = 15.0
+        
         if modo == "Flexion":
             st.info("📏 Geometría (mm)")
             c_L, c_dim = st.columns(2)
@@ -235,7 +211,7 @@ def render_tab_simulation(df_mats, show_math):
                 b_val = st.number_input("Ancho (b)", value=20.0)
                 d_val = st.number_input("Espesor (d)", value=10.0)
             geom = (L_val, b_val, d_val)
-            slider_max_def = 5.0
+            slider_max_def = 5.0 
         
         lbl = "Límite Carrera (%)" if (modo!="Torsion") else "Ángulo (rad)"
         max_v = 40.0 if modo!="Torsion" else 1.0
@@ -276,7 +252,8 @@ def render_tab_simulation(df_mats, show_math):
             export_data.append(df_tmp)
 
         title_map = {"Tension": "Tracción", "Compresion": "Compresión", "Torsion": "Torsión", "Flexion": "Ensayo de Flexión"}
-        fig.update_layout(title=f"{title_map[modo]}", xaxis_title=x_title, yaxis_title=y_title, 
+        fig.update_layout(title=f"Curvas ({units}) - {title_map[modo]}", 
+                          xaxis_title=x_title, yaxis_title=y_title, 
                           hovermode="x unified", template="plotly_white")
         if modo != "Flexion": fig.update_xaxes(range=[0, slider])
         st.plotly_chart(fig, use_container_width=True)
@@ -302,6 +279,7 @@ def render_tab_simulation(df_mats, show_math):
             st.plotly_chart(fig_bar, use_container_width=True)
 
 def render_tab_reports(df_mats):
+    """Renderiza la Pestaña 3: Reportes y exportación LaTeX."""
     st.header("📑 Reportes")
     if df_mats.empty: return
     c1, c2 = st.columns(2)
@@ -315,6 +293,7 @@ def render_tab_reports(df_mats):
         with t2: st.code(df.to_latex(index=False, float_format="%.2f"), language='latex')
 
 def main():
+    """Punto de entrada principal de la aplicación."""
     configure_page()
     try: df_raw = load_data()
     except: return
