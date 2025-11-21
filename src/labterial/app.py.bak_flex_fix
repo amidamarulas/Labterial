@@ -5,7 +5,6 @@ import plotly.graph_objects as go
 import os
 import sys
 
-# --- SETUP ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
@@ -68,9 +67,13 @@ def render_tab_management(df_mats):
             from pathlib import Path
             pkg = __package__ if __package__ else 'labterial'
             db_path = Path.home() / f".{pkg}" / "materials.db"
-            if not db_path.exists(): db_path = Path(__file__).parent.parent.parent / 'data' / 'materials.db'
+            if not db_path.exists(): 
+                db_path = Path(__file__).parent.parent.parent / 'data' / 'materials.db'
+            
+            # CORRECCIÓN DE SINTAXIS AQUÍ: Bloques separados
             if db_path.exists():
-                with open(db_path, "rb") as fp: st.download_button("💾 Backup BD", fp, "materials.db")
+                with open(db_path, "rb") as fp:
+                    st.download_button("💾 Backup BD", fp, "materials.db")
         except: pass
 
 def render_math_explainer(dat, modo, units, factor, unit_label, geom_params=None):
@@ -78,49 +81,49 @@ def render_math_explainer(dat, modo, units, factor, unit_label, geom_params=None
     Sy = dat['yield_strength'] * factor
     
     st.info(f"📘 **Fundamentos Físicos: {modo}**")
+    
     t1, t2 = st.tabs(["1. Mecánica Elástica", "2. Análisis de Falla"])
     
     if modo == "Flexion":
         L, b, d = geom_params if geom_params else (100, 10, 5)
-        # Calculo de Inercia
-        I = (b * d**3) / 12
         with t1:
             c_txt, c_eq = st.columns([3, 2])
             with c_txt:
-                st.markdown("**Flexión de 3 Puntos:**")
-                st.markdown("Ahora la gráfica muestra **Fuerza vs Deflexión**.")
-                st.markdown(f"La pendiente depende de la geometría ($I$):")
-                st.caption(f"Inercia I = {I:.1f} mm⁴")
+                st.markdown("**Flexión de 3 Puntos:** Viga apoyada extremos, carga central.")
+                st.caption(f"Geometría: L={L}mm, b={b}mm, d={d}mm")
             with c_eq:
-                st.markdown("#### Relación Fuerza-Esfuerzo")
-                st.latex(r"F = \frac{2 \cdot \sigma \cdot b \cdot d^2}{3 \cdot L}")
+                st.markdown("#### Fórmula de la Escuadría")
+                st.latex(r"\sigma = \frac{3 \cdot F \cdot L}{2 \cdot b \cdot d^2}")
         with t2:
-            st.markdown("**Deflexión ($\delta$):**")
-            st.latex(r"\delta = \frac{\epsilon \cdot L^2}{6 \cdot d}")
+            st.markdown("**Módulo de Ruptura (MOR):** Resistencia aparente mayor que tracción pura.")
+            st.latex(r"\sigma_{flex} \approx 1.2 \cdot \sigma_{traccion}")
 
     elif modo == "Torsion":
         G = E / (2 * (1 + dat.get('poisson_ratio', 0.3)))
         with t1:
-            st.markdown("**Cizalladura:** Deslizamiento de planos.")
-            st.caption(f"Módulo de Corte G ≈ {G:,.0f} {unit_label}")
-            st.latex(r"\tau = G \cdot \gamma")
+            c_txt, c_eq = st.columns([2, 1])
+            with c_txt:
+                st.markdown(" **Cizalladura:** Deslizamiento de planos atómicos.")
+                st.caption(f"Módulo de Corte G ≈ {G:,.0f} {unit_label}")
+            with c_eq:
+                st.latex(r"\tau = G \cdot \gamma")
         with t2:
-            st.markdown("Criterio Von Mises:")
-            st.latex(r"\tau_{y} \approx 0.577 \cdot \sigma_{y}")
+            st.markdown("Criterio de Von Mises:")
+            st.latex(r"\tau_{yield} \approx 0.577 \cdot \sigma_{yield}")
 
     elif modo == "Compresion":
         with t1:
-            st.markdown("**Acortamiento:**")
+            st.markdown("**Acortamiento:** El material se ensancha (Poisson).")
             st.latex(r"\sigma = - E \cdot \epsilon")
         with t2:
-            st.markdown("Sin estricción, el esfuerzo aparente sube indefinidamente.")
+            st.markdown("Sin estricción: El área aumenta, el esfuerzo sube indefinidamente.")
 
     else: # Tension
         with t1:
-            st.markdown("**Tracción Uniaxial:**")
+            st.markdown("**Tracción Uniaxial:** Separación de enlaces.")
             st.latex(r"\sigma = E \cdot \epsilon")
         with t2:
-            st.markdown("Ley de Hollomon:")
+            st.markdown("Endurecimiento (Hollomon):")
             st.latex(r"\sigma = K \cdot \epsilon^n")
 
 def render_tab_simulation(df_mats, show_math):
@@ -143,21 +146,19 @@ def render_tab_simulation(df_mats, show_math):
         st.divider()
         modo = st.radio("Ensayo", ["Tension", "Compresion", "Torsion", "Flexion"])
         
-        slider_max_def = 15.0
-        
         if modo == "Flexion":
             st.info("📏 Geometría (mm)")
             c_L, c_dim = st.columns(2)
-            with c_L: L_val = st.number_input("Largo (L)", value=200.0)
+            with c_L: L_val = st.number_input("Largo (L)", value=100)
             with c_dim: 
-                b_val = st.number_input("Ancho (b)", value=20.0)
-                d_val = st.number_input("Espesor (d)", value=10.0)
+                b_val = st.number_input("Ancho (b)", value=10)
+                d_val = st.number_input("Espesor (d)", value=5)
             geom = (L_val, b_val, d_val)
-            slider_max_def = 5.0 # En flexion la deformacion unitaria suele ser baja
         
-        lbl = "Límite Carrera (%)" if (modo!="Torsion") else "Ángulo (rad)"
+        lbl = "Límite (%)" if (modo!="Torsion") else "Ángulo (rad)"
         max_v = 40.0 if modo!="Torsion" else 1.0
-        slider = st.slider(lbl, 0.1, max_v, slider_max_def)
+        def_v = 5.0 if modo=="Flexion" else 15.0
+        slider = st.slider(lbl, 0.1, max_v, def_v)
         limit = slider/100 if modo!="Torsion" else slider
 
     with col_plot:
@@ -170,59 +171,23 @@ def render_tab_simulation(df_mats, show_math):
             props = dict(dat); props['category'] = dat.get('category', 'Metal')
             
             df_sim = simular_ensayo(props, modo, max_strain_machine=limit)
+            y_vals = df_sim["Esfuerzo (MPa)"] * factor
+            x_col = "Deformacion (%)" if modo!="Torsion" else "Deformacion (rad)"
             
-            # --- LOGICA DE GRAFICACIÓN DINÁMICA ---
-            if modo == "Flexion":
-                # CONVERTIR ESFUERZO/DEFORMACIÓN A FUERZA/DEFLEXIÓN
-                # Sigma = 3FL / 2bd^2  ->  F = (2 * Sigma * b * d^2) / (3 * L)
-                # Epsilon = 6 d delta / L^2 -> delta = (Epsilon * L^2) / (6 * d)
-                
-                # 1. Obtener valores base (SI)
-                sigma_si = df_sim["Esfuerzo (MPa)"]
-                epsilon_si = df_sim["Deformacion (mm/mm)"]
-                
-                # 2. Convertir a Estructural (Newtons y mm)
-                # Cuidado con división por cero si L o d son 0 (inputs protegidos por streamlit, pero por si acaso)
-                F_val = (2 * sigma_si * b_val * (d_val**2)) / (3 * L_val)
-                Delta_val = (epsilon_si * (L_val**2)) / (6 * d_val)
-                
-                # 3. Ajuste Imperial si aplica (Newtons a Libras-Fuerza? mm a pulgadas?)
-                # Para simplificar en modo educativo, mantendremos N y mm si es SI
-                # Si es Imperial, convertimos N -> lbf y mm -> in
-                x_vals = Delta_val
-                y_vals = F_val
-                x_title = "Deflexión (mm)"
-                y_title = "Fuerza (N)"
-                
-                if is_imperial:
-                    x_vals = x_vals * 0.0393701 # mm a in
-                    y_vals = y_vals * 0.224809  # N a lbf
-                    x_title = "Deflexión (in)"
-                    y_title = "Fuerza (lbf)"
+            fig.add_trace(go.Scatter(x=df_sim[x_col], y=y_vals, mode='lines', name=mat, line=dict(width=3)))
             
-            else:
-                # MODO STANDARD (Material puro)
-                y_vals = df_sim["Esfuerzo (MPa)"] * factor
-                x_col = "Deformacion (%)" if modo!="Torsion" else "Deformacion (rad)"
-                x_vals = df_sim[x_col]
-                x_title = x_col.replace("Deformacion", "Deformación")
-                y_title = f"Esfuerzo ({unit_label})"
-
-            # Plot
-            fig.add_trace(go.Scatter(x=x_vals, y=y_vals, mode='lines', name=mat, line=dict(width=3)))
-            
-            # Guardar datos export
-            df_tmp = pd.DataFrame({x_title: x_vals, y_title: y_vals, 'Material': mat})
+            df_tmp = df_sim[[x_col]].copy(); df_tmp['Esfuerzo'] = y_vals; df_tmp['Material'] = mat
             export_data.append(df_tmp)
 
-        title_map = {"Tension": "Tracción", "Compresion": "Compresión", "Torsion": "Torsión", "Flexion": "Ensayo de Flexión"}
-        fig.update_layout(title=f"{title_map[modo]}", xaxis_title=x_title, yaxis_title=y_title, 
+        t_map = {"Tension": "Tracción", "Compresion": "Compresión", "Torsion": "Torsión", "Flexion": "Flexión"}
+        fig.update_layout(title=f"Curvas ({units}) - {t_map[modo]}", 
+                          xaxis_title=x_col.replace("Deformacion", "Deformación"), 
+                          yaxis_title=f"Esfuerzo ({unit_label})", 
                           hovermode="x unified", template="plotly_white")
+        fig.update_xaxes(range=[0, slider])
         
-        # Zoom solo si no es flexión (en flexión la escala cambia mucho segun geometria)
-        if modo != "Flexion": fig.update_xaxes(range=[0, slider])
-        
-        st.plotly_chart(fig, use_container_width=True)
+        config_plot = {'toImageButtonOptions': {'format': 'png', 'filename': f'simulacion_{modo}', 'height': 800, 'width': 1200, 'scale': 2}, 'displaylogo': False}
+        st.plotly_chart(fig, use_container_width=True, config=config_plot)
         
         if export_data:
             df_exp = pd.concat(export_data)
@@ -232,9 +197,7 @@ def render_tab_simulation(df_mats, show_math):
             render_math_explainer(df_mats[df_mats['name'] == sel[0]].iloc[0], modo, units, factor, unit_label, geom)
             
         st.divider()
-        st.subheader("📊 Benchmarking (Propiedades Intrínsecas)")
-        st.caption("Nota: Estas gráficas comparan las propiedades del material (independiente de la geometría).")
-        
+        st.subheader("📊 Benchmarking")
         df_sub = df_mats[df_mats['name'].isin(sel)].copy()
         opts = {"yield_strength": f"Resistencia (Sy)", "elastic_modulus": f"Rigidez (E)", "density": "Densidad", "cost": "Costo"}
         opts = {k:v for k,v in opts.items() if k in df_sub.columns}
