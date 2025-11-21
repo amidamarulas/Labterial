@@ -3,6 +3,39 @@ import pandas as pd
 from scipy.interpolate import interp1d
 
 def simular_ensayo(material_props, tipo_ensayo, max_strain_machine=0.05, puntos=300):
+    """
+    Simula el comportamiento mecánico de un material bajo diferentes tipos de carga.
+
+    Esta función actúa como el "motor físico" del software. Utiliza un modelo fenomenológico
+    basado en propiedades mecánicas estándar ($E, S_y, S_u$) para generar curvas de
+    Esfuerzo-Deformación realistas.
+
+    Incluye lógica avanzada para:
+    
+    *   **Ductilidad Dinámica:** Calcula el punto de ruptura basándose en la relación $S_u/S_y$.
+    *   **Torsión:** Aplica criterio de Von Mises ($\tau = \sigma / \sqrt{3}$).
+    *   **Flexión:** Aplica un factor de corrección para el Módulo de Ruptura (MOR).
+    *   **Compresión:** Simula el abarrilamiento sin fractura en materiales dúctiles.
+
+    Args:
+        material_props (dict): Diccionario con las propiedades del material. 
+            Debe contener: ``elastic_modulus``, ``yield_strength``, ``ultimate_strength`` (opcional), 
+            ``poisson_ratio`` (opcional) y ``category``.
+        tipo_ensayo (str): El modo de carga. Opciones:
+            ``'Tension'``, ``'Compresion'``, ``'Torsion'``, ``'Flexion'``.
+        max_strain_machine (float, optional): El límite máximo de deformación (eje X) configurado 
+            en la máquina virtual. Por defecto 0.05.
+        puntos (int, optional): Resolución de la simulación (número de filas). Por defecto 300.
+
+    Returns:
+        pd.DataFrame: DataFrame con los resultados de la simulación.
+        
+        Columnas generadas:
+        
+        *   ``Esfuerzo (MPa)``: Eje Y.
+        *   ``Deformacion (mm/mm)`` o ``(rad)``: Eje X base.
+        *   ``Deformacion (%)``: Columna auxiliar para visualización.
+    """
     
     E = float(material_props['elastic_modulus'])
     Sy = float(material_props['yield_strength'])
@@ -40,16 +73,13 @@ def simular_ensayo(material_props, tipo_ensayo, max_strain_machine=0.05, puntos=
         col_stress = "Esfuerzo (MPa)"
         col_strain = "Deformacion (rad)"
     elif is_flexion:
-        # En flexión, el material suele resistir más que en tracción pura (Módulo de Ruptura)
-        # especialmente en frágiles, porque el volumen sometido a tensión máxima es pequeño.
-        factor_mor = 1.2 # Modulus of Rupture factor
-        Modulus = E # La rigidez es la misma (E)
+        factor_mor = 1.2 
+        Modulus = E 
         Yield_Point = Sy * 1.1 
         Ultimate_Point = Su * factor_mor
         col_stress = "Esfuerzo (MPa)"
-        col_strain = "Deformacion (mm/mm)" # Strain en la fibra externa
+        col_strain = "Deformacion (mm/mm)" 
     else:
-        # Tension / Compresion
         Modulus = E
         Yield_Point = Sy
         Ultimate_Point = Su
@@ -82,7 +112,6 @@ def simular_ensayo(material_props, tipo_ensayo, max_strain_machine=0.05, puntos=
             p_strain.append(strain_at_peak)
             p_stress.append(Ultimate_Point)
             p_strain.append(fracture_point)
-            # En flexión la caída es más suave antes de la rotura final
             drop_factor = 0.95 if is_flexion else 0.85
             p_stress.append(Ultimate_Point * drop_factor)
 

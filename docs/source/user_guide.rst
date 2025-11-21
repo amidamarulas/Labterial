@@ -1,39 +1,36 @@
-Guía de Usuario
-===============
+Manual de Usuario
+=================
 
-Bienvenido a **Labterial**, tu laboratorio virtual de materiales.
+Bienvenido a **Labterial v1.2**. Esta guía explica cómo utilizar las herramientas avanzadas de simulación.
 
-Inicio Rápido
--------------
+Nuevas Funcionalidades
+----------------------
 
-1. **Abrir el programa:**
-   Ejecuta en tu terminal:
-   
-   .. code-block:: bash
-   
-      material-lab
+1. **Simulación de Flexión (3 Puntos):**
+   Ahora puedes simular vigas sometidas a flexión.
+   * Selecciona *Flexión* en el menú de ensayo.
+   * Ingresa las dimensiones geométricas: **Largo (L)**, **Ancho (b)** y **Espesor (d)**.
+   * La gráfica mostrará automáticamente **Fuerza (N)** vs **Deflexión (mm)**.
 
-2. **Pestaña 1: Base de Datos**
-   Aquí puedes ver los materiales disponibles.
-   
-   * **Importar Datos:** Usa el panel derecho para subir archivos .
-   * **Formato CSV:** El archivo debe tener las columnas: name, category, elastic_modulus, yield_strength.
-   * **Backup:** Usa el botón "Backup BD" para descargar tus datos.
+2. **Modo Profesor (Pedagógico):**
+   Activa la casilla "Mostrar Explicación Física" en la barra lateral.
+   * Verás las ecuaciones exactas usadas (Hooke, Von Mises, Escuadría).
+   * Se explicará el fenómeno físico (cizalladura, estricción, etc.).
 
-3. **Pestaña 2: Simulación**
-   * Selecciona una **Probeta** del menú desplegable.
-   * Elige el tipo de ensayo (Tensión, Compresión, Torsión).
-   * Usa el **Slider** para definir hasta dónde llega la máquina.
-   * *Nota:* Si el material es frágil, la gráfica se cortará antes de llegar al límite del slider.
+3. **Benchmarking (Comparativa):**
+   En la pestaña de simulación, selecciona múltiples materiales.
+   * Verás las curvas superpuestas.
+   * Abajo aparecerá un gráfico de barras comparando propiedades clave (Rigidez, Costo, Densidad).
 
-4. **Pestaña 3: Reportes**
-   * Filtra los materiales que te interesan.
-   * Descarga la tabla en **Excel (CSV)** o copia el código **LaTeX** para tu informe.
+4. **Sistema de Unidades:**
+   Usa el selector "SI (MPa)" o "Imperial (ksi)" para cambiar todas las gráficas y tablas instantáneamente.
 
-Solución de Problemas
----------------------
-Si la aplicación no abre, asegúrate de haber instalado las dependencias con:
+Flujo de Trabajo Básico
+-----------------------
 
-.. code-block:: bash
-
-   pip install .
+1. **Importar:** Ve a la pestaña *Base de Datos* y carga tu archivo CSV o usa los datos por defecto.
+2. **Simular:** Ve a *Simulación*, elige tus probetas y analiza los resultados.
+3. **Exportar:**
+   * Usa el icono de cámara en la gráfica para guardar una imagen PNG de alta calidad.
+   * Usa el botón "Descargar Datos (CSV)" para obtener los puntos X-Y y procesarlos externamente.
+   * Ve a la pestaña *Reportes* para generar código LaTeX para tu informe.

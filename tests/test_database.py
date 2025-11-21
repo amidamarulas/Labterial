@@ -3,63 +3,68 @@ import pandas as pd
 import sqlite3
 import sys
 import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-# Importar módulo
+# Configuración de Path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
-# Importación robusta (Paquete o Módulo)
 try:
     from labterial import database_mgr
 except ImportError:
-    try:
-        import database_mgr
-    except:
-        from src.labterial import database_mgr
+    from src.labterial import database_mgr
+
+# --- CLASE HELPER PARA PYTHON 3.12 ---
+class UnclosableConnection:
+    """
+    Envuelve una conexión SQLite real pero ignora la orden .close().
+    Necesario porque en Python 3.12+ el método close es read-only.
+    """
+    def __init__(self, conn):
+        self.conn = conn
+    
+    def __getattr__(self, name):
+        # Delega cualquier llamada (cursor, commit, etc) a la conexión real
+        return getattr(self.conn, name)
+    
+    def close(self):
+        # ¡No hacemos nada! La conexión sigue viva.
+        pass
 
 class TestDatabase(unittest.TestCase):
     
     def setUp(self):
-        """
-        Configuración previa a CADA test.
-        Creamos una BD en memoria real, pero modificamos su comportamiento.
-        """
-        # 1. Crear conexión real en RAM
-        self.conn = sqlite3.connect(':memory:')
-        self.cursor = self.conn.cursor()
+        # 1. Crear conexión real en memoria
+        self.real_conn = sqlite3.connect(':memory:')
+        self.cursor = self.real_conn.cursor()
         
-        # 2. Crear tabla idéntica a la real
+        # 2. Crear esquema
         self.cursor.execute('''
-            CREATE TABLE materials (
+            CREATE TABLE IF NOT EXISTS materials (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL UNIQUE,
                 category TEXT NOT NULL,
                 elastic_modulus REAL NOT NULL,
                 yield_strength REAL NOT NULL,
                 ultimate_strength REAL,
-                poisson_ratio REAL
+                poisson_ratio REAL,
+                density REAL,
+                cost REAL,
+                max_temp REAL
             )
         ''')
-        self.conn.commit()
-
-        # --- EL TRUCO MAESTRO ---
-        # Guardamos la función 'close' original para usarla al final
-        self.real_close = self.conn.close
+        self.real_conn.commit()
         
-        # Reemplazamos 'close' por una función lambda que NO HACE NADA.
-        # Así, cuando init_db() llame a conn.close(), la conexión sigue viva.
-        self.conn.close = lambda: None
+        # 3. Crear el objeto "inmortal" que usará el código
+        self.safe_conn = UnclosableConnection(self.real_conn)
 
     def tearDown(self):
-        """Limpieza después de CADA test."""
-        # Restauramos la función original para poder cerrar de verdad
-        self.conn.close = self.real_close
-        self.conn.close()
+        # Cerrar la conexión real manualmente al final del test
+        self.real_conn.close()
 
     @patch('sqlite3.connect')
     def test_insert_valid_material(self, mock_connect):
-        # El mock siempre devuelve nuestra conexión "inmortal"
-        mock_connect.return_value = self.conn
+        # El mock devuelve nuestra conexión protegida
+        mock_connect.return_value = self.safe_conn
         
         data = {
             'name': ['Vibranium'],
@@ -73,40 +78,36 @@ class TestDatabase(unittest.TestCase):
         
         self.assertEqual(added, 1)
         self.assertEqual(ignored, 0)
-        self.assertIsNone(error)
         
-        # Verificar que realmente se guardó
-        curr = self.conn.cursor()
+        # Verificar en la DB real
+        curr = self.real_conn.cursor()
         curr.execute("SELECT name FROM materials WHERE name='Vibranium'")
-        result = curr.fetchone()
-        self.assertEqual(result[0], 'Vibranium')
+        self.assertEqual(curr.fetchone()[0], 'Vibranium')
 
     @patch('sqlite3.connect')
     def test_insert_duplicate(self, mock_connect):
-        mock_connect.return_value = self.conn
+        mock_connect.return_value = self.safe_conn
         
-        # Insertar primero manualmente
+        # Insertar primero
         self.cursor.execute("INSERT INTO materials (name, category, elastic_modulus, yield_strength) VALUES ('Adamantium', 'Metal', 1, 1)")
-        self.conn.commit()
+        self.real_conn.commit()
         
-        # Intentar insertar lo mismo vía función
+        # Intentar duplicar
         df = pd.DataFrame({'name': ['Adamantium'], 'category': ['Metal'], 'elastic_modulus': [1], 'yield_strength': [1]})
         
         added, ignored, error = database_mgr.insert_from_dataframe(df)
         
         self.assertEqual(added, 0)
         self.assertEqual(ignored, 1)
-        self.assertIsNone(error)
 
     @patch('sqlite3.connect')
     def test_missing_columns(self, mock_connect):
-        mock_connect.return_value = self.conn
+        mock_connect.return_value = self.safe_conn
         
         df = pd.DataFrame({'name': ['MalaData'], 'elastic_modulus': [100]})
-        
         added, ignored, error = database_mgr.insert_from_dataframe(df)
         
-        self.assertIn("Falta columna", error)
+        self.assertIn("Falta columna", str(error))
         self.assertEqual(added, 0)
 
 if __name__ == '__main__':

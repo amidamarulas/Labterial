@@ -1,16 +1,14 @@
 import os
 import sys
 
-# --- RUTA CRÍTICA ---
-# Apuntamos a src/labterial para que Sphinx pueda hacer 'import app' directamente
-sys.path.insert(0, os.path.abspath('../../src/labterial'))
-# También apuntamos a src por si acaso
+# Apuntar a la raíz del código fuente y al paquete específico
 sys.path.insert(0, os.path.abspath('../../src'))
+sys.path.insert(0, os.path.abspath('../../src/labterial'))
 
-project = 'Material Database'
-copyright = '2025, Labterial Team'
-author = 'Dev'
-release = '1.0'
+project = 'Labterial'
+copyright = '2025, Equipo de Ingeniería'
+author = 'Dev Team'
+release = '1.2' # Versión actualizada
 
 extensions = [
     'sphinx.ext.autodoc',
@@ -19,14 +17,11 @@ extensions = [
     'sphinx.ext.githubpages',
 ]
 
-# Mocking: Simulamos estas librerías para que Sphinx no falle si no están instaladas
+# Mocking crítico para evitar errores de importación en ReadTheDocs/Local
 autodoc_mock_imports = [
     "pandas", "numpy", "scipy", "plotly", "streamlit", "sqlite3"
 ]
 
-# Configuración Napoleon (Google Style)
+# Configuración Napoleon
 napoleon_google_docstring = True
-napoleon_use_param = True
-napoleon_use_rtype = True
-
 html_theme = 'sphinx_rtd_theme'
