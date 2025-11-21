@@ -40,7 +40,7 @@ def render_sidebar(df_raw):
     st.sidebar.header("🔍 Filtros")
     st.sidebar.divider()
     st.sidebar.subheader("👨‍🏫 Modo Profesor")
-    show_math = st.sidebar.checkbox("Mostrar Explicación Física", value=True)
+    show_math = st.sidebar.checkbox("Mostrar Ecuaciones Detalladas", value=True)
     st.sidebar.divider()
     if isinstance(df_raw, pd.DataFrame) and 'category' in df_raw.columns:
         cats = df_raw['category'].unique().tolist()
@@ -73,99 +73,54 @@ def render_tab_management(df_mats):
                 with open(db_path, "rb") as fp: st.download_button("💾 Backup BD", fp, "materials.db")
         except: pass
 
-# --- FUNCIÓN PEDAGÓGICA AVANZADA (Torsión/Compresión/Tensión) ---
+# --- FUNCIÓN PEDAGÓGICA MEJORADA ---
 def render_math_explainer(dat, modo, units, factor, unit_label):
-    """
-    Renderiza explicación adaptada al tipo de ensayo seleccionado.
-    """
-    # Datos base
+    """Renderiza una explicación detallada paso a paso."""
+    
     E = dat['elastic_modulus'] * factor
     Sy = dat['yield_strength'] * factor
     Su = dat['ultimate_strength'] * factor
-    Nu = dat.get('poisson_ratio', 0.3)
     
-    st.info(f"📘 **Fundamentos Físicos: {modo}**")
+    st.info("📘 **Fundamentos Físicos del Comportamiento**")
     
-    t1, t2 = st.tabs(["1. Comportamiento Elástico", "2. Comportamiento Plástico"])
+    t1, t2 = st.tabs(["1. Zona Elástica (Lineal)", "2. Zona Plástica (No Lineal)"])
     
-    # Lógica dinámica según el ensayo
-    if modo == "Torsion":
-        # Cálculos de Torsión (Corte)
-        G = E / (2 * (1 + Nu))
-        Ty = Sy * 0.577  # Von Mises
-        
-        with t1:
-            c_txt, c_eq = st.columns([2, 1])
-            with c_txt:
-                st.markdown("""
-                **Cizalladura (Shear):**
-                Aquí no estiramos los enlaces atómicos, los deslizamos lateralmente (como un mazo de cartas).
-                La rigidez ya no es $E$, sino el **Módulo de Cortante ($G$)**.
-                """)
-                st.caption(f"Para este material: G ≈ {G:,.0f} {unit_label} (Calculado usando ν={Nu})")
-            with c_eq:
-                st.markdown("#### Ley de Hooke (Corte)")
-                st.latex(r"\tau = G \cdot \gamma")
-                st.markdown("* $\\tau$: Esfuerzo Cortante\n* $\gamma$: Deformación Angular")
-        
-        with t2:
+    with t1:
+        c_text, c_eq = st.columns([2, 1])
+        with c_text:
             st.markdown("""
-            **Fluencia en Torsión:**
-            Los materiales suelen ceder a esfuerzos más bajos en corte que en tracción.
-            Usamos el criterio de **Von Mises** para estimarlo:
+            **¿Qué ocurre aquí?**
+            Los átomos del material se separan ligeramente, pero los enlaces químicos no se rompen.
+            Si retiras la fuerza, el material vuelve a su forma original (como un resorte).
             """)
-            st.latex(r"\tau_{yield} \approx 0.577 \cdot \sigma_{yield}")
-            st.markdown(f"**Límite Cortante Estimado:** $\\tau_y \\approx {Ty:,.0f} \\text{{ {unit_label} }}$")
-
-    elif modo == "Compresion":
-        with t1:
-            c_txt, c_eq = st.columns([2, 1])
-            with c_txt:
-                st.markdown("""
-                **Acortamiento:**
-                Los átomos se compactan. El material se acorta en el eje de carga y se **ensancha** lateralmente por el Efecto Poisson.
-                """)
-                st.caption(f"Rigidez (E): {E:,.0f} {unit_label}")
-            with c_eq:
-                st.markdown("#### Ley de Hooke")
-                st.latex(r"\sigma = - E \cdot \epsilon")
-                st.caption("El signo negativo indica compresión.")
-        
-        with t2:
+            st.markdown(f"**Parámetro Clave:** La pendiente de la recta es la **Rigidez** ($E$).")
+            st.caption(f"Para este material: E = {E:,.0f} {unit_label}")
+        with c_eq:
+            st.markdown("#### Ley de Hooke")
+            st.latex(r"\sigma = E \cdot \epsilon")
             st.markdown("""
-            **Sin Rotura Aparente:**
-            En materiales dúctiles bajo compresión, no hay estricción (cuello). 
-            El área transversal aumenta ($A > A_0$), por lo que el material parece volverse infinitamente fuerte.
-            La gráfica sube continuamente (Endurecimiento geométrico + por deformación).
+            * $\sigma$: Esfuerzo (Fuerza/Área)
+            * $E$: Módulo de Young
+            * $\epsilon$: Deformación Unitaria
             """)
 
-    else: # Tension (Tracción)
-        with t1:
-            c_txt, c_eq = st.columns([2, 1])
-            with c_txt:
-                st.markdown("""
-                **Estiramiento:**
-                Separación de enlaces atómicos. Si retiras la carga, el material recupera su longitud original.
-                La pendiente es la **Rigidez ($E$)**.
-                """)
-                st.caption(f"Módulo de Young: E = {E:,.0f} {unit_label}")
-            with c_eq:
-                st.markdown("#### Ley de Hooke")
-                st.latex(r"\sigma = E \cdot \epsilon")
-                st.markdown("* $\sigma$: Esfuerzo Normal\n* $\epsilon$: Deformación Axial")
-
-        with t2:
-            c_txt, c_eq = st.columns([2, 1])
-            with c_txt:
-                st.markdown("""
-                **Fluencia y Endurecimiento:**
-                Superado $S_y$, las dislocaciones se mueven irreversiblemente.
-                El material se vuelve más duro hasta llegar a $S_u$, luego se forma un cuello y rompe.
-                """)
-                st.caption(f"Rango Plástico: {Sy:.0f} $\\to$ {Su:.0f} {unit_label}")
-            with c_eq:
-                st.markdown("#### Hollomon")
-                st.latex(r"\sigma = K \cdot \epsilon^n")
+    with t2:
+        c_text, c_eq = st.columns([2, 1])
+        with c_text:
+            st.markdown("""
+            **¿Qué ocurre aquí?**
+            Se ha superado el límite elástico ($S_y$). Los planos de átomos empiezan a deslizarse unos sobre otros (dislocaciones).
+            El cambio de forma es **permanente**.
+            """)
+            st.markdown(f"**El Rango:** Ocurre desde **Sy** ({Sy:.0f}) hasta el máximo **Su** ({Su:.0f}).")
+        with c_eq:
+            st.markdown("#### Modelo de Hollomon")
+            st.latex(r"\sigma = K \cdot \epsilon^n")
+            st.markdown("""
+            * $K$: Coeficiente de resistencia
+            * $n$: Exponente de endurecimiento
+            """)
+            st.caption("Modelamos esto como una curva parabólica.")
 
 def render_tab_simulation(df_mats, show_math):
     if df_mats.empty: st.warning("Sin datos."); return
@@ -218,19 +173,24 @@ def render_tab_simulation(df_mats, show_math):
                           hovermode="x unified", template="plotly_white")
         fig.update_xaxes(range=[0, slider])
         
-        # Configuración de descarga
-        config_plot = {'toImageButtonOptions': {'format': 'png', 'filename': f'simulacion_{modo}', 'height': 800, 'width': 1200, 'scale': 2}, 'displaylogo': False}
+        # Configuración de descarga imagen
+        config_plot = {
+            'toImageButtonOptions': {
+                'format': 'png', 'filename': f'simulacion_{modo}',
+                'height': 800, 'width': 1200, 'scale': 2
+            }, 'displaylogo': False
+        }
         st.plotly_chart(fig, use_container_width=True, config=config_plot)
         
         if export_data:
             df_exp = pd.concat(export_data)
             st.download_button("💾 Descargar Datos (CSV)", df_exp.to_csv(index=False).encode('utf-8'), "simulacion.csv")
 
-        # --- LÓGICA PEDAGÓGICA DINÁMICA ---
+        # --- SECCIÓN PEDAGÓGICA DETALLADA ---
         if show_math and len(sel) == 1:
             render_math_explainer(df_mats[df_mats['name'] == sel[0]].iloc[0], modo, units, factor, unit_label)
             
-        # --- BENCHMARKING ---
+        # --- BENCHMARKING (BARRAS) ---
         st.divider()
         st.subheader("📊 Benchmarking (Comparativa)")
         df_sub = df_mats[df_mats['name'].isin(sel)].copy()
@@ -241,11 +201,13 @@ def render_tab_simulation(df_mats, show_math):
             "density": "Densidad (g/cm³)",
             "cost": "Costo ($/kg)"
         }
+        # Filtrar opciones validas
         opts = {k:v for k,v in opts.items() if k in df_sub.columns}
         
         if opts:
             prop = st.selectbox("Propiedad a comparar:", list(opts.keys()), format_func=lambda x: opts[x])
             vals = df_sub[prop].values
+            # Convertir unidades mecanicas si es imperial
             if is_imperial and prop in ["yield_strength", "elastic_modulus", "ultimate_strength"]:
                 vals = vals * factor
                 
