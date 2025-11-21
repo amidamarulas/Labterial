@@ -1,0 +1,162 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Módulo de Física (Simulación) &mdash; Labterial 1.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=61243dd2"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Gestor de Base de Datos" href="database.html" />
+    <link rel="prev" title="Interfaz Gráfica (Streamlit)" href="app.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Labterial
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Manual:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide.html">Manual de Usuario</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Referencia:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="app.html">Interfaz Gráfica (Streamlit)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Módulo de Física (Simulación)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#physics.simular_ensayo"><code class="docutils literal notranslate"><span class="pre">simular_ensayo()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Gestor de Base de Datos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Interfaz de Línea de Comandos (CLI)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Labterial</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Módulo de Física (Simulación)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/physics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-physics">
+<span id="modulo-de-fisica-simulacion"></span><h1>Módulo de Física (Simulación)<a class="headerlink" href="#module-physics" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="physics.simular_ensayo">
+<span class="sig-prename descclassname"><span class="pre">physics.</span></span><span class="sig-name descname"><span class="pre">simular_ensayo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">material_props</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tipo_ensayo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_strain_machine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">puntos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/physics.html#simular_ensayo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#physics.simular_ensayo" title="Link to this definition"></a></dt>
+<dd><p>Simula el comportamiento mecánico de un material bajo diferentes tipos de carga.</p>
+<p>Esta función actúa como el “motor físico” del software. Utiliza un modelo fenomenológico
+basado en propiedades mecánicas estándar ($E, S_y, S_u$) para generar curvas de
+Esfuerzo-Deformación realistas.</p>
+<p>Incluye lógica avanzada para:</p>
+<ul class="simple">
+<li><p><strong>Ductilidad Dinámica:</strong> Calcula el punto de ruptura basándose en la relación $S_u/S_y$.</p></li>
+<li><p><strong>Torsión:</strong> Aplica criterio de Von Mises ($    au = sigma / sqrt{3}$).</p></li>
+<li><p><strong>Flexión:</strong> Aplica un factor de corrección para el Módulo de Ruptura (MOR).</p></li>
+<li><p><strong>Compresión:</strong> Simula el abarrilamiento sin fractura en materiales dúctiles.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>material_props</strong> (<em>dict</em>) – Diccionario con las propiedades del material.
+Debe contener: <code class="docutils literal notranslate"><span class="pre">elastic_modulus</span></code>, <code class="docutils literal notranslate"><span class="pre">yield_strength</span></code>, <code class="docutils literal notranslate"><span class="pre">ultimate_strength</span></code> (opcional),
+<code class="docutils literal notranslate"><span class="pre">poisson_ratio</span></code> (opcional) y <code class="docutils literal notranslate"><span class="pre">category</span></code>.</p></li>
+<li><p><strong>tipo_ensayo</strong> (<em>str</em>) – El modo de carga. Opciones:
+<code class="docutils literal notranslate"><span class="pre">'Tension'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Compresion'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Torsion'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Flexion'</span></code>.</p></li>
+<li><p><strong>max_strain_machine</strong> (<em>float</em><em>, </em><em>optional</em>) – El límite máximo de deformación (eje X) configurado
+en la máquina virtual. Por defecto 0.05.</p></li>
+<li><p><strong>puntos</strong> (<em>int</em><em>, </em><em>optional</em>) – Resolución de la simulación (número de filas). Por defecto 300.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>DataFrame con los resultados de la simulación.</p>
+<p>Columnas generadas:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Esfuerzo</span> <span class="pre">(MPa)</span></code>: Eje Y.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Deformacion</span> <span class="pre">(mm/mm)</span></code> o <code class="docutils literal notranslate"><span class="pre">(rad)</span></code>: Eje X base.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Deformacion</span> <span class="pre">(%)</span></code>: Columna auxiliar para visualización.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="app.html" class="btn btn-neutral float-left" title="Interfaz Gráfica (Streamlit)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="database.html" class="btn btn-neutral float-right" title="Gestor de Base de Datos" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Equipo de Ingeniería.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

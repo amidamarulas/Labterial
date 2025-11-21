@@ -1,0 +1,254 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>database_mgr &mdash; Labterial 1.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=61243dd2"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Labterial
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Manual:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide.html">Manual de Usuario</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Referencia:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/app.html">Interfaz Gráfica (Streamlit)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/physics.html">Módulo de Física (Simulación)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/database.html">Gestor de Base de Datos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/cli.html">Interfaz de Línea de Comandos (CLI)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Labterial</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">database_mgr</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for database_mgr</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sqlite3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="c1"># Definir ruta segura para la base de datos (compatible con pip install)</span>
+<span class="n">USER_DATA_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.labterial&quot;</span>
+<span class="n">DB_PATH</span> <span class="o">=</span> <span class="n">USER_DATA_DIR</span> <span class="o">/</span> <span class="s1">&#39;materials.db&#39;</span>
+
+<div class="viewcode-block" id="init_db">
+<a class="viewcode-back" href="../modules/database.html#database_mgr.init_db">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">init_db</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inicializa la conexión y puebla la base de datos con una lista maestra de materiales.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Crear carpeta si no existe</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">USER_DATA_DIR</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">USER_DATA_DIR</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">DB_PATH</span><span class="p">))</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    
+    <span class="c1"># Esquema Completo</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">        CREATE TABLE IF NOT EXISTS materials (</span>
+<span class="s1">            id INTEGER PRIMARY KEY AUTOINCREMENT,</span>
+<span class="s1">            name TEXT NOT NULL UNIQUE,</span>
+<span class="s1">            category TEXT NOT NULL,</span>
+<span class="s1">            elastic_modulus REAL NOT NULL,</span>
+<span class="s1">            yield_strength REAL NOT NULL,</span>
+<span class="s1">            ultimate_strength REAL,</span>
+<span class="s1">            poisson_ratio REAL,</span>
+<span class="s1">            density REAL,</span>
+<span class="s1">            cost REAL,</span>
+<span class="s1">            max_temp REAL</span>
+<span class="s1">        )</span>
+<span class="s1">    &#39;&#39;&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># --- SEMILLA MAESTRA DE DATOS ---</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT count(*) FROM materials&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># Lista consolidada de materiales estandar, exoticos, polimeros y biomateriales</span>
+        <span class="c1"># Formato: (Nombre, Cat, E, Sy, Su, Poisson, Densidad, Costo, Tmax)</span>
+        <span class="n">master_data</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="c1"># METALES ESTANDAR</span>
+            <span class="p">(</span><span class="s1">&#39;Acero A36 Estructural&#39;</span><span class="p">,</span> <span class="s1">&#39;Metal&#39;</span><span class="p">,</span> <span class="mi">200000</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mf">0.26</span><span class="p">,</span> <span class="mf">7.85</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mi">500</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Aluminio 6061-T6&#39;</span><span class="p">,</span> <span class="s1">&#39;Metal&#39;</span><span class="p">,</span> <span class="mi">68900</span><span class="p">,</span> <span class="mi">276</span><span class="p">,</span> <span class="mi">310</span><span class="p">,</span> <span class="mf">0.33</span><span class="p">,</span> <span class="mf">2.70</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mi">150</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Acero Inoxidable 304&#39;</span><span class="p">,</span> <span class="s1">&#39;Metal&#39;</span><span class="p">,</span> <span class="mi">193000</span><span class="p">,</span> <span class="mi">215</span><span class="p">,</span> <span class="mi">505</span><span class="p">,</span> <span class="mf">0.29</span><span class="p">,</span> <span class="mf">8.00</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">800</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Cobre Recocido&#39;</span><span class="p">,</span> <span class="s1">&#39;Metal&#39;</span><span class="p">,</span> <span class="mi">110000</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">220</span><span class="p">,</span> <span class="mf">0.34</span><span class="p">,</span> <span class="mf">8.96</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Latón Amarillo&#39;</span><span class="p">,</span> <span class="s1">&#39;Metal&#39;</span><span class="p">,</span> <span class="mi">105000</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">350</span><span class="p">,</span> <span class="mf">0.34</span><span class="p">,</span> <span class="mf">8.50</span><span class="p">,</span> <span class="mf">7.0</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Titanio Ti-6Al-4V&#39;</span><span class="p">,</span> <span class="s1">&#39;Metal&#39;</span><span class="p">,</span> <span class="mi">113800</span><span class="p">,</span> <span class="mi">880</span><span class="p">,</span> <span class="mi">950</span><span class="p">,</span> <span class="mf">0.34</span><span class="p">,</span> <span class="mf">4.43</span><span class="p">,</span> <span class="mf">40.0</span><span class="p">,</span> <span class="mi">400</span><span class="p">),</span>
+            
+            <span class="c1"># METALES EXÓTICOS Y ALTA RESISTENCIA</span>
+            <span class="p">(</span><span class="s1">&#39;Acero Maraging 300&#39;</span><span class="p">,</span> <span class="s1">&#39;Metal&#39;</span><span class="p">,</span> <span class="mi">190000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="mi">2100</span><span class="p">,</span> <span class="mf">0.30</span><span class="p">,</span> <span class="mf">8.00</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mi">400</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Inconel 718&#39;</span><span class="p">,</span> <span class="s1">&#39;Metal&#39;</span><span class="p">,</span> <span class="mi">200000</span><span class="p">,</span> <span class="mi">1034</span><span class="p">,</span> <span class="mi">1240</span><span class="p">,</span> <span class="mf">0.29</span><span class="p">,</span> <span class="mf">8.19</span><span class="p">,</span> <span class="mf">80.0</span><span class="p">,</span> <span class="mi">700</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Tungsteno&#39;</span><span class="p">,</span> <span class="s1">&#39;Metal&#39;</span><span class="p">,</span> <span class="mi">411000</span><span class="p">,</span> <span class="mi">750</span><span class="p">,</span> <span class="mi">980</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="mf">19.25</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mi">1500</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Plomo Puro&#39;</span><span class="p">,</span> <span class="s1">&#39;Metal&#39;</span><span class="p">,</span> <span class="mi">16000</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mf">0.44</span><span class="p">,</span> <span class="mf">11.34</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Oro Puro&#39;</span><span class="p">,</span> <span class="s1">&#39;Metal&#39;</span><span class="p">,</span> <span class="mi">79000</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mf">0.42</span><span class="p">,</span> <span class="mf">19.30</span><span class="p">,</span> <span class="mf">60000.0</span><span class="p">,</span> <span class="mi">1064</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Metal Amorfo (Bulk Glass)&#39;</span><span class="p">,</span> <span class="s1">&#39;Metal&#39;</span><span class="p">,</span> <span class="mi">100000</span><span class="p">,</span> <span class="mi">1500</span><span class="p">,</span> <span class="mi">1800</span><span class="p">,</span> <span class="mf">0.36</span><span class="p">,</span> <span class="mf">6.00</span><span class="p">,</span> <span class="mf">200.0</span><span class="p">,</span> <span class="mi">400</span><span class="p">),</span>
+            
+            <span class="c1"># POLÍMEROS Y PLÁSTICOS</span>
+            <span class="p">(</span><span class="s1">&#39;Nylon 6/6&#39;</span><span class="p">,</span> <span class="s1">&#39;Polimero&#39;</span><span class="p">,</span> <span class="mi">2800</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">85</span><span class="p">,</span> <span class="mf">0.40</span><span class="p">,</span> <span class="mf">1.15</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mi">90</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Policarbonato&#39;</span><span class="p">,</span> <span class="s1">&#39;Polimero&#39;</span><span class="p">,</span> <span class="mi">2400</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="mf">0.37</span><span class="p">,</span> <span class="mf">1.20</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mi">120</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;PLA (Impresion 3D)&#39;</span><span class="p">,</span> <span class="s1">&#39;Polimero&#39;</span><span class="p">,</span> <span class="mi">3500</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mf">0.36</span><span class="p">,</span> <span class="mf">1.24</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">,</span> <span class="mi">55</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;PETG (Impresion 3D)&#39;</span><span class="p">,</span> <span class="s1">&#39;Polimero&#39;</span><span class="p">,</span> <span class="mi">2100</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">55</span><span class="p">,</span> <span class="mf">0.40</span><span class="p">,</span> <span class="mf">1.27</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">,</span> <span class="mi">75</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;TPU 95A (Flexible)&#39;</span><span class="p">,</span> <span class="s1">&#39;Polimero&#39;</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mf">0.48</span><span class="p">,</span> <span class="mf">1.20</span><span class="p">,</span> <span class="mf">35.0</span><span class="p">,</span> <span class="mi">80</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;PTFE (Teflon)&#39;</span><span class="p">,</span> <span class="s1">&#39;Polimero&#39;</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mf">0.46</span><span class="p">,</span> <span class="mf">2.20</span><span class="p">,</span> <span class="mf">15.0</span><span class="p">,</span> <span class="mi">260</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Goma de Caucho&#39;</span><span class="p">,</span> <span class="s1">&#39;Polimero&#39;</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mf">0.49</span><span class="p">,</span> <span class="mf">0.92</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mi">80</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;PEEK (Aeroespacial)&#39;</span><span class="p">,</span> <span class="s1">&#39;Polimero&#39;</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">110</span><span class="p">,</span> <span class="mf">0.38</span><span class="p">,</span> <span class="mf">1.32</span><span class="p">,</span> <span class="mf">150.0</span><span class="p">,</span> <span class="mi">250</span><span class="p">),</span>
+
+            <span class="c1"># CERÁMICOS Y VIDRIOS</span>
+            <span class="p">(</span><span class="s1">&#39;Concreto Estandar&#39;</span><span class="p">,</span> <span class="s1">&#39;Ceramico&#39;</span><span class="p">,</span> <span class="mi">30000</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">0.20</span><span class="p">,</span> <span class="mf">2.40</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mi">400</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Alumina (Al2O3)&#39;</span><span class="p">,</span> <span class="s1">&#39;Ceramico&#39;</span><span class="p">,</span> <span class="mi">370000</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mf">0.22</span><span class="p">,</span> <span class="mf">3.95</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">,</span> <span class="mi">1500</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Vidrio de Ventana&#39;</span><span class="p">,</span> <span class="s1">&#39;Ceramico&#39;</span><span class="p">,</span> <span class="mi">70000</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mf">0.22</span><span class="p">,</span> <span class="mf">2.50</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">500</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Diamante Sintetico&#39;</span><span class="p">,</span> <span class="s1">&#39;Ceramico&#39;</span><span class="p">,</span> <span class="mi">1220000</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="mi">6000</span><span class="p">,</span> <span class="mf">0.20</span><span class="p">,</span> <span class="mf">3.52</span><span class="p">,</span> <span class="mf">5000.0</span><span class="p">,</span> <span class="mi">800</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Carburo de Silicio&#39;</span><span class="p">,</span> <span class="s1">&#39;Ceramico&#39;</span><span class="p">,</span> <span class="mi">410000</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">450</span><span class="p">,</span> <span class="mf">0.14</span><span class="p">,</span> <span class="mf">3.10</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mi">1600</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Hielo (-10C)&#39;</span><span class="p">,</span> <span class="s1">&#39;Ceramico&#39;</span><span class="p">,</span> <span class="mi">9000</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mf">0.33</span><span class="p">,</span> <span class="mf">0.92</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+
+            <span class="c1"># COMPUESTOS Y NATURALES</span>
+            <span class="p">(</span><span class="s1">&#39;Fibra de Carbono (Epoxy)&#39;</span><span class="p">,</span> <span class="s1">&#39;Compuesto&#39;</span><span class="p">,</span> <span class="mi">230000</span><span class="p">,</span> <span class="mi">800</span><span class="p">,</span> <span class="mi">1500</span><span class="p">,</span> <span class="mf">0.20</span><span class="p">,</span> <span class="mf">1.60</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mi">120</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Fibra de Vidrio (G10)&#39;</span><span class="p">,</span> <span class="s1">&#39;Compuesto&#39;</span><span class="p">,</span> <span class="mi">24000</span><span class="p">,</span> <span class="mi">240</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">1.80</span><span class="p">,</span> <span class="mf">30.0</span><span class="p">,</span> <span class="mi">130</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Madera de Roble&#39;</span><span class="p">,</span> <span class="s1">&#39;Compuesto&#39;</span><span class="p">,</span> <span class="mi">11000</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mf">0.30</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Madera de Balsa&#39;</span><span class="p">,</span> <span class="s1">&#39;Compuesto&#39;</span><span class="p">,</span> <span class="mi">3500</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Corcho Natural&#39;</span><span class="p">,</span> <span class="s1">&#39;Compuesto&#39;</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.24</span><span class="p">,</span> <span class="mf">15.0</span><span class="p">,</span> <span class="mi">120</span><span class="p">),</span>
+            
+            <span class="c1"># BIOMATERIALES Y CURIOSIDADES</span>
+            <span class="p">(</span><span class="s1">&#39;Hueso Cortical&#39;</span><span class="p">,</span> <span class="s1">&#39;Biomaterial&#39;</span><span class="p">,</span> <span class="mi">17000</span><span class="p">,</span> <span class="mi">110</span><span class="p">,</span> <span class="mi">130</span><span class="p">,</span> <span class="mf">0.30</span><span class="p">,</span> <span class="mf">1.90</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">60</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Seda de Araña&#39;</span><span class="p">,</span> <span class="s1">&#39;Biomaterial&#39;</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span> <span class="mi">1100</span><span class="p">,</span> <span class="mi">1200</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="mf">1.30</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Cabello Humano&#39;</span><span class="p">,</span> <span class="s1">&#39;Biomaterial&#39;</span><span class="p">,</span> <span class="mi">3000</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mf">0.38</span><span class="p">,</span> <span class="mf">1.30</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;Espagueti Seco&#39;</span><span class="p">,</span> <span class="s1">&#39;Alimento&#39;</span><span class="p">,</span> <span class="mi">3000</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mf">0.30</span><span class="p">,</span> <span class="mf">1.50</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="p">]</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">                INSERT INTO materials </span>
+<span class="s1">                (name, category, elastic_modulus, yield_strength, ultimate_strength, poisson_ratio, density, cost, max_temp) </span>
+<span class="s1">                VALUES (?,?,?,?,?,?,?,?,?)</span>
+<span class="s1">            &#39;&#39;&#39;</span><span class="p">,</span> <span class="n">master_data</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Base de datos inicializada con </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">master_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> materiales.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error poblando base de datos: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+    <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="get_all_materials">
+<a class="viewcode-back" href="../modules/database.html#database_mgr.get_all_materials">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_all_materials</span><span class="p">():</span>
+    <span class="n">init_db</span><span class="p">()</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">DB_PATH</span><span class="p">))</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM materials&quot;</span><span class="p">,</span> <span class="n">conn</span><span class="p">)</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="insert_from_dataframe">
+<a class="viewcode-back" href="../modules/database.html#database_mgr.insert_from_dataframe">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">insert_from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="n">init_db</span><span class="p">()</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">DB_PATH</span><span class="p">))</span>
+    <span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">added</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">ignored</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">req</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;category&#39;</span><span class="p">,</span> <span class="s1">&#39;elastic_modulus&#39;</span><span class="p">,</span> <span class="s1">&#39;yield_strength&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">req</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span> <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Falta columna requerida: </span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s2">&quot;</span>
+        
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">                INSERT INTO materials </span>
+<span class="s1">                (name, category, elastic_modulus, yield_strength, ultimate_strength, poisson_ratio, density, cost, max_temp) </span>
+<span class="s1">                VALUES (?,?,?,?,?,?,?,?,?)</span>
+<span class="s1">            &#39;&#39;&#39;</span><span class="p">,</span> <span class="p">(</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;category&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;elastic_modulus&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;yield_strength&#39;</span><span class="p">],</span> 
+                <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ultimate_strength&#39;</span><span class="p">),</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;poisson_ratio&#39;</span><span class="p">),</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;density&#39;</span><span class="p">),</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cost&#39;</span><span class="p">),</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_temp&#39;</span><span class="p">)</span>
+            <span class="p">))</span>
+            <span class="n">added</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">IntegrityError</span><span class="p">:</span> <span class="n">ignored</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span> <span class="k">return</span> <span class="n">added</span><span class="p">,</span> <span class="n">ignored</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            
+    <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">();</span> <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">added</span><span class="p">,</span> <span class="n">ignored</span><span class="p">,</span> <span class="kc">None</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Equipo de Ingeniería.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
