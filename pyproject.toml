@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "labterial-sim"
-version = "1.2.2"  # <-- Subimos versión para poder publicar los cambios
+version = "1.3.0"  # <-- Subimos versión para poder publicar los cambios
 description = "Suite de simulación de ensayos mecánicos y gestión de materiales."
 readme = "README.md"
 authors = [
