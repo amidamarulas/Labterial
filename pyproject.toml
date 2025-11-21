@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "labterial-sim"
-version = "1.2.1"  # <-- VERSIÓN INCREMENTADA
+version = "1.2.2"  # <-- Subimos versión para poder publicar los cambios
 description = "Suite de simulación de ensayos mecánicos y gestión de materiales."
 readme = "README.md"
 authors = [
@@ -17,7 +17,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Physics"
-    # Eliminamos "Framework :: Streamlit" porque causaba error 400
 ]
 dependencies = [
     "streamlit>=1.20.0",
@@ -32,7 +31,8 @@ dependencies = [
 "Bug Tracker" = "https://github.com/amidamarulas/Labterial/issues"
 
 [project.scripts]
-labterial = "labterial.cli:main"
+# AQUÍ DEFINIMOS EL COMANDO QUE EL USUARIO ESCRIBIRÁ EN SU CONSOLA
+material-lab = "labterial.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
