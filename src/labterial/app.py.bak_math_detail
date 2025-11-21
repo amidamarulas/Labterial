@@ -5,7 +5,6 @@ import plotly.graph_objects as go
 import os
 import sys
 
-# --- SETUP ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
@@ -30,7 +29,7 @@ def translate_df(df):
     return df.rename(columns=LABEL_MAP)
 
 def configure_page():
-    st.set_page_config(page_title="Labterial Edu", layout="wide", page_icon="🧪")
+    st.set_page_config(page_title="Labterial", layout="wide", page_icon="🧪")
     st.title("🧪 Labterial: Suite de Ingeniería")
 
 def load_data():
@@ -39,8 +38,10 @@ def load_data():
 def render_sidebar(df_raw):
     st.sidebar.header("🔍 Filtros")
     st.sidebar.divider()
-    st.sidebar.subheader("👨‍🏫 Modo Profesor")
-    show_math = st.sidebar.checkbox("Mostrar Ecuaciones Detalladas", value=True)
+    
+    # Mantenemos solo la ecuación básica, quitamos energía
+    show_math = st.sidebar.checkbox("Mostrar Ecuaciones", value=False)
+    
     st.sidebar.divider()
     if isinstance(df_raw, pd.DataFrame) and 'category' in df_raw.columns:
         cats = df_raw['category'].unique().tolist()
@@ -73,54 +74,19 @@ def render_tab_management(df_mats):
                 with open(db_path, "rb") as fp: st.download_button("💾 Backup BD", fp, "materials.db")
         except: pass
 
-# --- FUNCIÓN PEDAGÓGICA MEJORADA ---
 def render_math_explainer(dat, modo, units, factor, unit_label):
-    """Renderiza una explicación detallada paso a paso."""
-    
+    st.info("💡 **Explicación Matemática**")
     E = dat['elastic_modulus'] * factor
     Sy = dat['yield_strength'] * factor
-    Su = dat['ultimate_strength'] * factor
-    
-    st.info("📘 **Fundamentos Físicos del Comportamiento**")
-    
-    t1, t2 = st.tabs(["1. Zona Elástica (Lineal)", "2. Zona Plástica (No Lineal)"])
-    
-    with t1:
-        c_text, c_eq = st.columns([2, 1])
-        with c_text:
-            st.markdown("""
-            **¿Qué ocurre aquí?**
-            Los átomos del material se separan ligeramente, pero los enlaces químicos no se rompen.
-            Si retiras la fuerza, el material vuelve a su forma original (como un resorte).
-            """)
-            st.markdown(f"**Parámetro Clave:** La pendiente de la recta es la **Rigidez** ($E$).")
-            st.caption(f"Para este material: E = {E:,.0f} {unit_label}")
-        with c_eq:
-            st.markdown("#### Ley de Hooke")
-            st.latex(r"\sigma = E \cdot \epsilon")
-            st.markdown("""
-            * $\sigma$: Esfuerzo (Fuerza/Área)
-            * $E$: Módulo de Young
-            * $\epsilon$: Deformación Unitaria
-            """)
-
-    with t2:
-        c_text, c_eq = st.columns([2, 1])
-        with c_text:
-            st.markdown("""
-            **¿Qué ocurre aquí?**
-            Se ha superado el límite elástico ($S_y$). Los planos de átomos empiezan a deslizarse unos sobre otros (dislocaciones).
-            El cambio de forma es **permanente**.
-            """)
-            st.markdown(f"**El Rango:** Ocurre desde **Sy** ({Sy:.0f}) hasta el máximo **Su** ({Su:.0f}).")
-        with c_eq:
-            st.markdown("#### Modelo de Hollomon")
-            st.latex(r"\sigma = K \cdot \epsilon^n")
-            st.markdown("""
-            * $K$: Coeficiente de resistencia
-            * $n$: Exponente de endurecimiento
-            """)
-            st.caption("Modelamos esto como una curva parabólica.")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("#### Zona Elástica")
+        st.latex(r"\sigma = E \cdot \epsilon")
+        st.caption(f"E = {E:.0f} {unit_label}")
+    with c2:
+        st.markdown("#### Zona Plástica")
+        st.latex(r"\sigma = S_y + K \cdot \epsilon^n")
+        st.caption(f"Sy = {Sy:.0f} {unit_label}")
 
 def render_tab_simulation(df_mats, show_math):
     if df_mats.empty: st.warning("Sin datos."); return
@@ -160,10 +126,14 @@ def render_tab_simulation(df_mats, show_math):
             y_vals = df_sim["Esfuerzo (MPa)"] * factor
             x_col = "Deformacion (%)" if modo!="Torsion" else "Deformacion (rad)"
             
-            fig.add_trace(go.Scatter(x=df_sim[x_col], y=y_vals, mode='lines', name=mat, line=dict(width=3)))
+            fig.add_trace(go.Scatter(
+                x=df_sim[x_col], y=y_vals, mode='lines', name=mat, line=dict(width=3)
+            ))
             
+            # Guardar para exportar
             df_tmp = df_sim[[x_col]].copy()
-            df_tmp['Esfuerzo'] = y_vals; df_tmp['Material'] = mat
+            df_tmp['Esfuerzo'] = y_vals
+            df_tmp['Material'] = mat
             export_data.append(df_tmp)
 
         t_map = {"Tension": "Tracción", "Compresion": "Compresión", "Torsion": "Torsión"}
@@ -172,28 +142,23 @@ def render_tab_simulation(df_mats, show_math):
                           yaxis_title=f"Esfuerzo ({unit_label})", 
                           hovermode="x unified", template="plotly_white")
         fig.update_xaxes(range=[0, slider])
+        st.plotly_chart(fig, use_container_width=True)
         
-        # Configuración de descarga imagen
-        config_plot = {
-            'toImageButtonOptions': {
-                'format': 'png', 'filename': f'simulacion_{modo}',
-                'height': 800, 'width': 1200, 'scale': 2
-            }, 'displaylogo': False
-        }
-        st.plotly_chart(fig, use_container_width=True, config=config_plot)
-        
+        # Botón descarga
         if export_data:
             df_exp = pd.concat(export_data)
             st.download_button("💾 Descargar Datos (CSV)", df_exp.to_csv(index=False).encode('utf-8'), "simulacion.csv")
 
-        # --- SECCIÓN PEDAGÓGICA DETALLADA ---
         if show_math and len(sel) == 1:
             render_math_explainer(df_mats[df_mats['name'] == sel[0]].iloc[0], modo, units, factor, unit_label)
             
-        # --- BENCHMARKING (BARRAS) ---
+        # --- AQUÍ RESTAURAMOS LA SECCIÓN DE BARRAS (BENCHMARKING) ---
         st.divider()
         st.subheader("📊 Benchmarking (Comparativa)")
+        
         df_sub = df_mats[df_mats['name'].isin(sel)].copy()
+        
+        # Opciones de propiedades
         opts = {
             "yield_strength": f"Resistencia (Sy) [{unit_label}]",
             "elastic_modulus": f"Rigidez (E) [{unit_label}]",
@@ -201,25 +166,29 @@ def render_tab_simulation(df_mats, show_math):
             "density": "Densidad (g/cm³)",
             "cost": "Costo ($/kg)"
         }
-        # Filtrar opciones validas
+        
+        # Si la columna no existe en el DF (ej. si usaste el CSV simple), la quitamos de opciones
         opts = {k:v for k,v in opts.items() if k in df_sub.columns}
         
         if opts:
             prop = st.selectbox("Propiedad a comparar:", list(opts.keys()), format_func=lambda x: opts[x])
+            
+            # Conversión de unidades solo si es propiedad mecánica y estamos en Imperial
             vals = df_sub[prop].values
-            # Convertir unidades mecanicas si es imperial
             if is_imperial and prop in ["yield_strength", "elastic_modulus", "ultimate_strength"]:
                 vals = vals * factor
                 
             fig_bar = px.bar(df_sub, x='name', y=vals, color='name', text_auto='.1f', title=opts[prop])
             fig_bar.update_layout(showlegend=False, template="plotly_white", yaxis_title=opts[prop], xaxis_title=None)
             st.plotly_chart(fig_bar, use_container_width=True)
+        else:
+            st.warning("No hay propiedades numéricas suficientes para comparar.")
 
 def render_tab_reports(df_mats):
     st.header("📑 Reportes")
     if df_mats.empty: return
     c1, c2 = st.columns(2)
-    with c1: sel = st.multiselect("Materiales", df_mats['name'].unique())
+    with c1: sel = st.multiselect("Materiales", df_mats['name'].unique(), default=df_mats['name'].iloc[:2].tolist() if len(df_mats)>0 else None)
     with c2: cols = st.multiselect("Propiedades", [c for c in df_mats.columns if c!='id'], default=['name','yield_strength'], format_func=lambda x: LABEL_MAP.get(x, x))
     if sel and cols:
         df = df_mats[df_mats['name'].isin(sel)][cols]
@@ -232,6 +201,8 @@ def main():
     configure_page()
     try: df_raw = load_data()
     except: return
+    
+    # Nota: render_sidebar ahora solo devuelve 2 valores (df y show_math)
     df_mats, show_math = render_sidebar(df_raw)
     
     tab1, tab2, tab3 = st.tabs(["📦 Base de Datos", "📈 Simulación", "📑 Reportes"])
