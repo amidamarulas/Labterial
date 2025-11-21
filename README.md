@@ -39,8 +39,11 @@ python -m labterial
 *   **Modo Profesor:** Explicaciones matemáticas y físicas en tiempo real.
 *   **Exportación:** Genera reportes en CSV, Imágenes de alta calidad y código LaTeX.
 
-## Accede En Linea A Traves De
+## Accede En Linea A Traves De:
 https://labterial-sisrv4ygujqpuyeirqfg9j.streamlit.app
+
+## Observa La Documentacion En:
+https://amidamarulas.github.io/Labterial
 
 ---
 Desarrollado con ❤️ usando Streamlit y Python.
