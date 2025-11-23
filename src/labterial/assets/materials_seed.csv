@@ -1,0 +1,98 @@
+name,category,elastic_modulus,yield_strength,ultimate_strength,poisson_ratio
+Acero Estructural ASTM A36,Metal,200000,250,400,0.26
+Acero Inoxidable 304,Metal,193000,215,505,0.29
+Acero de Herramientas AISI O1,Metal,210000,650,900,0.28
+Hierro Fundido Gris ASTM 30,Metal,110000,200,250,0.26
+Aluminio 6061-T6,Metal,68900,276,310,0.33
+Aluminio 7075-T6 (Aeroespacial),Metal,71700,503,572,0.33
+Cobre Recocido,Metal,110000,69,220,0.34
+Latón Amarillo (C26800),Metal,105000,150,350,0.34
+Titanio Ti-6Al-4V,Metal,113800,880,950,0.34
+Oro Puro,Metal,79000,30,100,0.42
+Magnesio AZ31B,Metal,45000,220,290,0.35
+ABS (Plastico Lego),Polimero,2300,40,50,0.35
+Nylon 6/6,Polimero,2800,80,85,0.40
+Policarbonato,Polimero,2400,60,70,0.37
+Polietileno HDPE,Polimero,1000,25,30,0.46
+PVC Rigido,Polimero,3000,45,52,0.38
+Goma de Caucho (Natural),Polimero,50,20,25,0.49
+Alumina (Al2O3 99%),Ceramico,370000,250,300,0.22
+Vidrio de Borosilicato (Pyrex),Ceramico,64000,30,60,0.20
+Hormigon (Concreto Estandar),Ceramico,30000,3,4,0.20
+Carburo de Tungsteno,Ceramico,600000,3440,3500,0.22
+Fibra de Carbono (Epoxy Unidireccional),Compuesto,230000,800,1500,0.25
+Fibra de Vidrio (E-Glass),Compuesto,72000,1500,2000,0.23
+Madera de Roble (Longitudinal),Compuesto,11000,40,90,0.30
+Madera de Pino (Longitudinal),Compuesto,9000,35,70,0.30
+Kevlar 49 (Epoxy),Compuesto,76000,1200,1400,0.34
+Acero Maraging 300 (Ultra Resistencia),Metal,190000,2000,2100,0.30
+Acero Inoxidable 316L (Quirurgico),Metal,193000,170,485,0.27
+Inconel 718 (Superaleacion),Metal,200000,1034,1240,0.29
+Hastelloy X (Alta Temperatura),Metal,205000,360,750,0.30
+Cobre Berilio (C17200),Metal,125000,960,1100,0.30
+Bronce Fosforado (C51000),Metal,110000,380,500,0.34
+Monel 400 (Resistente Corrosion),Metal,179000,240,550,0.32
+Plata Esterlina (Ag 92.5),Metal,76000,130,280,0.37
+Platino Puro,Metal,168000,20,140,0.38
+Tungsteno (Wolframio),Metal,411000,750,980,0.28
+Zinc Zamak 3 (Fundicion),Metal,85000,220,280,0.29
+Nitinol (Memoria de Forma - Austenita),Metal,75000,200,800,0.33
+PEEK (Polimero Aeroespacial),Polimero,3600,100,110,0.38
+PTFE (Teflon),Polimero,500,15,25,0.46
+PMMA (Acrilico/Plexiglas),Polimero,3100,55,70,0.35
+POM (Acetal/Delrin),Polimero,2800,65,70,0.35
+PET (Poliester Botellas),Polimero,2900,55,60,0.40
+Resina Epoxica (Curada),Polimero,3500,60,80,0.35
+Carburo de Silicio (SiC),Ceramico,410000,400,450,0.14
+Zirconia (Y-TZP Dental),Ceramico,210000,800,900,0.31
+Vidrio de Cuarzo (Silice Fundida),Ceramico,72000,50,60,0.17
+Grafito (Isotropico),Ceramico,10000,20,30,0.20
+G-10 Garolite (Epoxy/Vidrio),Compuesto,24000,240,300,0.15
+Kevlar 49 (Composite Panel),Compuesto,76000,1200,1400,0.34
+Bambu (Estructural),Compuesto,20000,60,100,0.30
+Hueso Cortical Humano,Biomaterial,17000,110,130,0.30
+Seda de Araña (Dragline),Biomaterial,10000,1100,1200,0.28
+Diente (Esmalte),Biomaterial,84000,200,300,0.30
+PLA (Impresion 3D Estandar),Polimero,3500,50,60,0.36
+PETG (Impresion 3D Resistente),Polimero,2100,50,55,0.40
+Resina UV (Estandar SLA),Polimero,2500,40,50,0.35
+TPU 95A (Filamento Flexible),Polimero,25,10,35,0.48
+Fibra de Vidrio (Aislante Lana),Ceramico,1000,1,2,0.20
+Marmol (Estatutario),Ceramico,70000,15,20,0.25
+Porcelana (Vajilla Fina),Ceramico,75000,40,50,0.18
+Hierro Forjado (Torre Eiffel),Metal,190000,200,300,0.28
+Acero de Damasco (Cuchilleria),Metal,205000,800,1100,0.29
+Metal Amorfo (Bulk Metallic Glass),Metal,100000,1500,1800,0.36
+Molibdeno (Alta Temp),Metal,320000,500,700,0.31
+Tantalio (Implantes/Capacitores),Metal,186000,180,300,0.34
+Cabello Humano (Sano),Biomaterial,3000,150,200,0.38
+Uña (Keratina),Biomaterial,2500,20,40,0.35
+Cartilago Articular,Biomaterial,15,2,5,0.45
+Algodon (Fibra),Compuesto,7000,250,400,0.30
+Lana de Oveja,Compuesto,500,100,150,0.35
+Espagueti Seco (Pasta),Alimento,3000,10,15,0.30
+Chocolate Oscuro (70%),Alimento,1500,15,25,0.30
+Hueso Esponjoso (Trabecular),Biomaterial,500,5,10,0.30
+Aerogel de Grafeno,Compuesto,1,0.01,0.02,0.20
+Plomo Puro (Pb),Metal,16000,14,20
+Aluminio 2024-T3 (Aeronautico),Metal,73100,345,483
+Acero Cor-Ten (Intemperie),Metal,200000,345,485
+Stellite 6 (Aleacion Cobalto),Metal,209000,600,850
+Soldadura Sn63Pb37,Metal,32000,30,40
+Plata 999 (Pura),Metal,71000,55,140
+Rodio (Joyería/Catalizador),Metal,359000,900,1400
+Uranio Empobrecido,Metal,172000,200,450
+Silicio (Wafer Electronica),Ceramico,150000,120,130
+Diamante Sintetico,Ceramico,1220000,5000,6000
+Zafiro (Al2O3 Monocristal),Ceramico,400000,400,450
+Granito (Roca),Ceramico,60000,20,25
+Ladrillo Refractario,Ceramico,10000,5,8
+Asfalto (Pavimento 20C),Polimero,2000,1,2
+Silato (Goma de Silicona),Polimero,5,2,3
+Poliuretano (TPU 95A),Polimero,50,15,35
+Neopreno (Caucho Sintetico),Polimero,2,1,5
+Polipropileno (Cuerdas),Polimero,1300,30,35
+Corcho Natural,Compuesto,30,1,2
+Madera de Balsa,Compuesto,3500,20,30
+Aerogel de Silice,Compuesto,5,0.1,0.2
+Hielo (Agua solida -10C),Ceramico,9000,5,6

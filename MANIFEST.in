@@ -1,3 +1,4 @@
 include README.md
 include LICENSE
 recursive-include src/labterial *.py
+recursive-include src/labterial/assets *.csv
