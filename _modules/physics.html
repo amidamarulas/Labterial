@@ -1,0 +1,431 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>physics &mdash; Labterial 1.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=61243dd2"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Labterial
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Manual:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide.html">Manual de Usuario</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Referencia:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/app.html">Interfaz Gráfica (Streamlit)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/physics.html">Módulo de Física (Simulación)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/database.html">Gestor de Base de Datos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/cli.html">Interfaz de Línea de Comandos (CLI)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Labterial</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">physics</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for physics</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="c1"># ==============================================================================</span>
+<span class="c1"># FUNCIONES GENERADORAS (Modelos Matemáticos Vectoriales)</span>
+<span class="c1"># ==============================================================================</span>
+
+<div class="viewcode-block" id="curva_tension_metal">
+<a class="viewcode-back" href="../modules/physics.html#physics.curva_tension_metal">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">curva_tension_metal</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">Sy</span><span class="p">,</span> <span class="n">Su</span><span class="p">,</span> <span class="n">epsilon_ruptura</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Genera la curva Esfuerzo-Deformación para metales bajo tracción.</span>
+
+<span class="sd">    Implementa un modelo fenomenológico de tres etapas para materiales dúctiles:</span>
+<span class="sd">    1. **Elástica:** Lineal siguiendo la Ley de Hooke ($\sigma = E \cdot \epsilon$).</span>
+<span class="sd">    2. **Endurecimiento:** Curva de potencia desde la fluencia ($S_y$) hasta el esfuerzo último ($S_u$).</span>
+<span class="sd">    3. **Estricción (Necking):** Caída parabólica del esfuerzo ingenieril desde $S_u$ hasta la ruptura.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        E (float): Módulo de Young (MPa).</span>
+<span class="sd">        Sy (float): Límite de Fluencia (MPa).</span>
+<span class="sd">        Su (float): Esfuerzo Último (MPa).</span>
+<span class="sd">        epsilon_ruptura (float): Deformación unitaria en el punto de quiebre.</span>
+<span class="sd">        p (int, optional): Número de puntos a generar. Default 500.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: Dos arrays de numpy ``(deformacion, esfuerzo)``. El último punto de esfuerzo es ``None`` para simular el corte visual.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">εy</span> <span class="o">=</span> <span class="n">Sy</span> <span class="o">/</span> <span class="n">E</span>
+    
+    <span class="c1"># Caso Frágil (Sin zona plástica significativa)</span>
+    <span class="k">if</span> <span class="n">epsilon_ruptura</span> <span class="o">&lt;=</span> <span class="n">εy</span><span class="p">:</span> 
+        <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">epsilon_ruptura</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">E</span> <span class="o">*</span> <span class="n">e</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">epsilon_ruptura</span> <span class="o">*</span> <span class="mf">1.001</span><span class="p">);</span> <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">e</span><span class="p">,</span> <span class="n">s</span>
+
+    <span class="c1"># Caso Dúctil</span>
+    <span class="c1"># Estimamos que el pico (Su) ocurre al 60% del camino plástico</span>
+    <span class="n">εu</span> <span class="o">=</span> <span class="n">εy</span> <span class="o">+</span> <span class="p">(</span><span class="n">epsilon_ruptura</span> <span class="o">-</span> <span class="n">εy</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.6</span> 
+    
+    <span class="n">p1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span> <span class="o">*</span> <span class="p">(</span><span class="n">εy</span> <span class="o">/</span> <span class="n">epsilon_ruptura</span><span class="p">)))</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span> <span class="o">*</span> <span class="p">((</span><span class="n">εu</span> <span class="o">-</span> <span class="n">εy</span><span class="p">)</span> <span class="o">/</span> <span class="n">epsilon_ruptura</span><span class="p">)))</span>
+    <span class="n">p3</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">p</span> <span class="o">-</span> <span class="n">p1</span> <span class="o">-</span> <span class="n">p2</span><span class="p">)</span>
+
+    <span class="c1"># Fase 1: Elástica</span>
+    <span class="n">e1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">εy</span><span class="p">,</span> <span class="n">p1</span><span class="p">);</span> <span class="n">s1</span> <span class="o">=</span> <span class="n">E</span> <span class="o">*</span> <span class="n">e1</span>
+    
+    <span class="c1"># Fase 2: Endurecimiento (Hasta Su)</span>
+    <span class="n">e2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">εy</span><span class="p">,</span> <span class="n">εu</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">εu</span> <span class="o">&gt;</span> <span class="n">εy</span><span class="p">):</span>
+        <span class="c1"># Interpolación de potencia (Hollomon simplificado)</span>
+        <span class="n">s2</span> <span class="o">=</span> <span class="n">Sy</span> <span class="o">+</span> <span class="p">(</span><span class="n">Su</span> <span class="o">-</span> <span class="n">Sy</span><span class="p">)</span> <span class="o">*</span> <span class="p">(((</span><span class="n">e2</span> <span class="o">-</span> <span class="n">εy</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">εu</span> <span class="o">-</span> <span class="n">εy</span><span class="p">))</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="n">s2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">e2</span><span class="p">,</span> <span class="n">Su</span><span class="p">)</span>
+
+    <span class="c1"># Fase 3: Estricción (Post Su)</span>
+    <span class="n">e3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">εu</span><span class="p">,</span> <span class="n">epsilon_ruptura</span><span class="p">,</span> <span class="n">p3</span><span class="p">)</span>
+    <span class="n">Sf</span> <span class="o">=</span> <span class="n">Su</span> <span class="o">*</span> <span class="mf">0.85</span> <span class="c1"># Asumimos caída al 85% de carga antes de romper</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">epsilon_ruptura</span> <span class="o">&gt;</span> <span class="n">εu</span><span class="p">):</span>
+        <span class="n">s3</span> <span class="o">=</span> <span class="n">Su</span> <span class="o">-</span> <span class="p">(</span><span class="n">Su</span> <span class="o">-</span> <span class="n">Sf</span><span class="p">)</span> <span class="o">*</span> <span class="p">(((</span><span class="n">e3</span> <span class="o">-</span> <span class="n">εu</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">epsilon_ruptura</span> <span class="o">-</span> <span class="n">εu</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="n">s3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">e3</span><span class="p">,</span> <span class="n">Sf</span><span class="p">)</span>
+
+    <span class="n">deformacion</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">,</span> <span class="n">e3</span><span class="p">))</span>
+    <span class="n">esfuerzo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">s3</span><span class="p">))</span>
+    
+    <span class="c1"># Corte visual</span>
+    <span class="n">deformacion</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deformacion</span><span class="p">,</span> <span class="n">epsilon_ruptura</span> <span class="o">*</span> <span class="mf">1.001</span><span class="p">)</span>
+    <span class="n">esfuerzo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">esfuerzo</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">deformacion</span><span class="p">,</span> <span class="n">esfuerzo</span></div>
+
+
+<div class="viewcode-block" id="curva_tension_polimero">
+<a class="viewcode-back" href="../modules/physics.html#physics.curva_tension_polimero">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">curva_tension_polimero</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">Sy</span><span class="p">,</span> <span class="n">Su</span><span class="p">,</span> <span class="n">epsilon_ruptura</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Genera la curva para polímeros en tracción, simulando el fenómeno de &#39;Cold Drawing&#39;.</span>
+
+<span class="sd">    Modela el comportamiento complejo de polímeros semicristalinos (como Nylon o PE):</span>
+<span class="sd">    1. **Elástica:** Lineal inicial.</span>
+<span class="sd">    2. **Pico de Fluencia (Yield Drop):** Subida a un pico y caída posterior (Ablandamiento).</span>
+<span class="sd">    3. **Meseta (Cold Drawing):** Zona de esfuerzo constante donde el cuello se propaga.</span>
+<span class="sd">    4. **Endurecimiento:** Alineación de cadenas poliméricas antes de la ruptura.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        E (float): Módulo de Young (MPa).</span>
+<span class="sd">        Sy (float): Límite de Fluencia (MPa).</span>
+<span class="sd">        Su (float): Esfuerzo Último (MPa).</span>
+<span class="sd">        epsilon_ruptura (float): Deformación total.</span>
+<span class="sd">        p (int): Resolución.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: Arrays ``(deformacion, esfuerzo)``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">εy</span> <span class="o">=</span> <span class="n">Sy</span> <span class="o">/</span> <span class="n">E</span>
+    
+    <span class="c1"># Caso Frágil (Termoestables o Amorfos rígidos)</span>
+    <span class="k">if</span> <span class="n">epsilon_ruptura</span> <span class="o">&lt;=</span> <span class="n">εy</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">:</span> 
+        <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">epsilon_ruptura</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="c1"># Modelo ligeramente no lineal</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">E</span> <span class="o">*</span> <span class="n">e</span> <span class="o">-</span> <span class="p">(</span><span class="n">E</span> <span class="o">*</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">e</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">epsilon_ruptura</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">Su</span><span class="p">)</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">epsilon_ruptura</span> <span class="o">*</span> <span class="mf">1.001</span><span class="p">);</span> <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">e</span><span class="p">,</span> <span class="n">s</span>
+
+    <span class="c1"># Caso Dúctil (Semicristalinos)</span>
+    <span class="n">Su_draw</span> <span class="o">=</span> <span class="n">Sy</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">;</span> <span class="n">ε_cold_draw_end</span> <span class="o">=</span> <span class="n">epsilon_ruptura</span> <span class="o">*</span> <span class="mf">0.75</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="o">*</span><span class="mf">0.1</span><span class="p">);</span> <span class="n">p2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="o">*</span><span class="mf">0.1</span><span class="p">);</span> <span class="n">p3</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="o">*</span><span class="mf">0.5</span><span class="p">);</span> <span class="n">p4</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">p</span><span class="o">-</span><span class="n">p1</span><span class="o">-</span><span class="n">p2</span><span class="o">-</span><span class="n">p3</span><span class="p">)</span>
+
+    <span class="c1"># 1. Elástica</span>
+    <span class="n">e1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">εy</span><span class="p">,</span> <span class="n">p1</span><span class="p">);</span> <span class="n">s1</span> <span class="o">=</span> <span class="n">E</span> <span class="o">*</span> <span class="n">e1</span>
+    
+    <span class="c1"># 2. Caída (Yield Drop)</span>
+    <span class="n">e2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">εy</span><span class="p">,</span> <span class="n">εy</span><span class="o">*</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">e2</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span> <span class="n">s2</span> <span class="o">=</span> <span class="n">Sy</span> <span class="o">-</span> <span class="p">(</span><span class="n">Sy</span> <span class="o">-</span> <span class="n">Su_draw</span><span class="p">)</span> <span class="o">*</span> <span class="p">(((</span><span class="n">e2</span><span class="o">-</span><span class="n">e2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">e2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">e2</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="n">s2</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="c1"># 3. Meseta</span>
+    <span class="n">e3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">e2</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ε_cold_draw_end</span><span class="p">,</span> <span class="n">p3</span><span class="p">);</span> <span class="n">s3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">e3</span><span class="p">,</span> <span class="n">Su_draw</span><span class="p">)</span>
+    
+    <span class="c1"># 4. Endurecimiento</span>
+    <span class="n">e4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">ε_cold_draw_end</span><span class="p">,</span> <span class="n">epsilon_ruptura</span><span class="p">,</span> <span class="n">p4</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">e4</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span> <span class="n">s4</span> <span class="o">=</span> <span class="n">Su_draw</span> <span class="o">+</span> <span class="p">(</span><span class="n">Su</span> <span class="o">-</span> <span class="n">Su_draw</span><span class="p">)</span> <span class="o">*</span> <span class="p">(((</span><span class="n">e4</span><span class="o">-</span><span class="n">e4</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">e4</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">e4</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">**</span><span class="mf">1.5</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="n">s4</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">deformacion</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">,</span> <span class="n">e3</span><span class="p">,</span> <span class="n">e4</span><span class="p">))</span>
+    <span class="n">esfuerzo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">s3</span><span class="p">,</span> <span class="n">s4</span><span class="p">))</span>
+    
+    <span class="n">deformacion</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deformacion</span><span class="p">,</span> <span class="n">epsilon_ruptura</span> <span class="o">*</span> <span class="mf">1.001</span><span class="p">)</span>
+    <span class="n">esfuerzo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">esfuerzo</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">deformacion</span><span class="p">,</span> <span class="n">esfuerzo</span></div>
+
+
+<div class="viewcode-block" id="curva_compresion">
+<a class="viewcode-back" href="../modules/physics.html#physics.curva_compresion">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">curva_compresion</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">Sy</span><span class="p">,</span> <span class="n">Su</span><span class="p">,</span> <span class="n">max_strain</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Genera la curva de compresión para materiales dúctiles.</span>
+
+<span class="sd">    **Diferencia Física:** En compresión no existe la estricción (necking) que causa la caída</span>
+<span class="sd">    aparente del esfuerzo en tracción. Debido al aumento del área transversal (efecto Poisson)</span>
+<span class="sd">    y al endurecimiento, la curva crece indefinidamente sin romper.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        max_strain (float): Deformación máxima dictada por el slider (no hay ruptura intrínseca).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: Arrays ``(deformacion, esfuerzo)`` con signo negativo para el esfuerzo.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">εy</span> <span class="o">=</span> <span class="n">Sy</span> <span class="o">/</span> <span class="n">E</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">));</span> <span class="n">p2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">p</span> <span class="o">-</span> <span class="n">p1</span><span class="p">)</span>
+    
+    <span class="n">e1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">εy</span><span class="p">,</span> <span class="n">p1</span><span class="p">);</span> <span class="n">s1</span> <span class="o">=</span> <span class="n">E</span> <span class="o">*</span> <span class="n">e1</span>
+    <span class="n">e2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">εy</span><span class="p">,</span> <span class="n">max_strain</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">e2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># Modelo constitutivo de endurecimiento continuo</span>
+        <span class="n">K</span> <span class="o">=</span> <span class="p">(</span><span class="n">Su</span> <span class="o">-</span> <span class="n">Sy</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.2</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="c1"># Calibración empírica</span>
+        <span class="n">s2</span> <span class="o">=</span> <span class="n">Sy</span> <span class="o">+</span> <span class="n">K</span> <span class="o">*</span> <span class="p">((</span><span class="n">e2</span> <span class="o">-</span> <span class="n">εy</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="n">s2</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">)),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="curva_torsion">
+<a class="viewcode-back" href="../modules/physics.html#physics.curva_torsion">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">curva_torsion</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">Ty</span><span class="p">,</span> <span class="n">Tu</span><span class="p">,</span> <span class="n">gamma_ruptura</span><span class="p">,</span> <span class="n">is_brittle</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Genera la curva de Esfuerzo Cortante vs Deformación Angular.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        G (float): Módulo de Cortante (Shear Modulus).</span>
+<span class="sd">        Ty (float): Esfuerzo de Fluencia en Corte (Yield Shear).</span>
+<span class="sd">        Tu (float): Esfuerzo Último en Corte.</span>
+<span class="sd">        gamma_ruptura (float): Ángulo máximo de deformación (rad).</span>
+<span class="sd">        is_brittle (bool): Si es True, comportamiento lineal hasta rotura.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: Arrays ``(gamma, tau)``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gy</span> <span class="o">=</span> <span class="n">Ty</span> <span class="o">/</span> <span class="n">G</span>
+    
+    <span class="c1"># CASO 1: FRÁGIL (Lineal hasta rotura)</span>
+    <span class="k">if</span> <span class="n">is_brittle</span> <span class="ow">or</span> <span class="n">gamma_ruptura</span> <span class="o">&lt;=</span> <span class="n">gy</span><span class="p">:</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">gamma_ruptura</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">G</span> <span class="o">*</span> <span class="n">g</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">gamma_ruptura</span> <span class="o">*</span> <span class="mf">1.001</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">g</span><span class="p">,</span> <span class="n">t</span>
+
+    <span class="c1"># CASO 2: DÚCTIL (Gran deformación plástica sin estricción)</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span> <span class="o">*</span> <span class="mf">0.10</span><span class="p">))</span> 
+    <span class="n">p2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">p</span> <span class="o">-</span> <span class="n">p1</span><span class="p">)</span>
+    
+    <span class="n">g1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">gy</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">G</span> <span class="o">*</span> <span class="n">g1</span>
+    
+    <span class="n">g2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">gy</span><span class="p">,</span> <span class="n">gamma_ruptura</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">g2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># Endurecimiento suave (casi plano) típico de torsión</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="p">(</span><span class="n">g2</span> <span class="o">-</span> <span class="n">gy</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">gamma_ruptura</span> <span class="o">-</span> <span class="n">gy</span><span class="p">)</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="n">Ty</span> <span class="o">+</span> <span class="p">(</span><span class="n">Tu</span> <span class="o">-</span> <span class="n">Ty</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">ratio</span> <span class="o">**</span> <span class="mf">0.2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="n">t2</span> <span class="o">=</span> <span class="p">[]</span>
+        
+    <span class="n">g_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">))</span>
+    <span class="n">t_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">))</span>
+    
+    <span class="n">g_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">g_total</span><span class="p">,</span> <span class="n">gamma_ruptura</span> <span class="o">*</span> <span class="mf">1.001</span><span class="p">)</span>
+    <span class="n">t_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t_total</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">g_total</span><span class="p">,</span> <span class="n">t_total</span></div>
+
+
+<span class="c1"># ==============================================================================</span>
+<span class="c1"># ORQUESTADOR PRINCIPAL</span>
+<span class="c1"># ==============================================================================</span>
+
+<div class="viewcode-block" id="simular_ensayo">
+<a class="viewcode-back" href="../modules/physics.html#physics.simular_ensayo">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">simular_ensayo</span><span class="p">(</span><span class="n">material_props</span><span class="p">,</span> <span class="n">tipo_ensayo</span><span class="p">,</span> <span class="n">max_strain_machine</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">puntos</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Función principal que orquesta la simulación física.</span>
+
+<span class="sd">    1.  **Extracción de Propiedades:** Lee el diccionario de material y convierte unidades a SI base.</span>
+<span class="sd">    2.  **Cálculo de Ductilidad:** Estima el punto de ruptura intrínseco basado en la familia </span>
+<span class="sd">        del material (Metal, Polímero, Cerámico) y sus propiedades ($E, S_y, S_u$).</span>
+<span class="sd">    3.  **Generación:** Despacha la tarea a la función generadora específica (ej. ``curva_tension_polimero``)</span>
+<span class="sd">        según el tipo de ensayo.</span>
+<span class="sd">    4.  **Recorte:** Filtra los datos generados para que coincidan con el límite visual de la máquina</span>
+<span class="sd">        (slider), pero conservando el punto de ruptura si ocurre antes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        material_props (dict): Propiedades del material (elastic_modulus, yield_strength, etc).</span>
+<span class="sd">        tipo_ensayo (str): &#39;Tension&#39;, &#39;Compresion&#39;, &#39;Torsion&#39;, &#39;Flexion&#39;.</span>
+<span class="sd">        max_strain_machine (float): Límite del eje X definido por el usuario.</span>
+<span class="sd">        puntos (int): Resolución.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: DataFrame con columnas ``Deformacion``, ``Esfuerzo (MPa)`` y ``Deformacion (%)``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">E</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">material_props</span><span class="p">[</span><span class="s1">&#39;elastic_modulus&#39;</span><span class="p">])</span>
+    <span class="n">Sy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">material_props</span><span class="p">[</span><span class="s1">&#39;yield_strength&#39;</span><span class="p">])</span>
+    <span class="n">Su</span> <span class="o">=</span> <span class="n">material_props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ultimate_strength&#39;</span><span class="p">)</span>
+    <span class="n">Nu</span> <span class="o">=</span> <span class="n">material_props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;poisson_ratio&#39;</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">Cat</span> <span class="o">=</span> <span class="n">material_props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;category&#39;</span><span class="p">,</span> <span class="s1">&#39;Metal&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">Su</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">Su</span> <span class="o">&lt;=</span> <span class="n">Sy</span><span class="p">:</span> <span class="n">Su</span> <span class="o">=</span> <span class="n">Sy</span> <span class="o">*</span> <span class="mf">1.1</span>
+
+    <span class="c1"># --- DUCTILIDAD BASE (Axial) ---</span>
+    <span class="n">rupture_strain</span> <span class="o">=</span> <span class="mf">0.01</span>
+    <span class="k">if</span> <span class="n">Cat</span> <span class="o">==</span> <span class="s1">&#39;Metal&#39;</span><span class="p">:</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="p">(</span><span class="n">Su</span> <span class="o">/</span> <span class="n">Sy</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">rupture_strain</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mf">0.60</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.02</span> <span class="o">+</span> <span class="p">(</span><span class="n">ratio</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="n">Cat</span> <span class="o">==</span> <span class="s1">&#39;Polimero&#39;</span><span class="p">:</span>
+        <span class="c1"># Heurística calibrada: E&lt;500 -&gt; Gomas (300%), E&gt;2500 -&gt; Rígidos</span>
+        <span class="k">if</span> <span class="n">E</span> <span class="o">&lt;</span> <span class="mi">500</span><span class="p">:</span> <span class="n">rupture_strain</span> <span class="o">=</span> <span class="mf">3.0</span>
+        <span class="k">elif</span> <span class="n">E</span> <span class="o">&lt;</span> <span class="mi">2500</span><span class="p">:</span> <span class="n">rupture_strain</span> <span class="o">=</span> <span class="mf">1200.0</span> <span class="o">/</span> <span class="n">E</span> 
+        <span class="k">else</span><span class="p">:</span> <span class="n">rupture_strain</span> <span class="o">=</span> <span class="mf">0.05</span> <span class="o">+</span> <span class="p">(</span><span class="mf">500.0</span> <span class="o">/</span> <span class="n">E</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">Cat</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Ceramico&#39;</span><span class="p">,</span> <span class="s1">&#39;Vidrio&#39;</span><span class="p">]:</span>
+        <span class="n">rupture_strain</span> <span class="o">=</span> <span class="p">(</span><span class="n">Sy</span> <span class="o">/</span> <span class="n">E</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.0005</span>
+    <span class="k">elif</span> <span class="n">Cat</span> <span class="o">==</span> <span class="s1">&#39;Compuesto&#39;</span><span class="p">:</span>
+        <span class="n">rupture_strain</span> <span class="o">=</span> <span class="p">(</span><span class="n">Su</span> <span class="o">/</span> <span class="n">E</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.2</span>
+
+    <span class="c1"># --- AJUSTE PARA TORSIÓN (Ductilidad Angular Amplificada) ---</span>
+    <span class="k">if</span> <span class="n">tipo_ensayo</span> <span class="o">==</span> <span class="s1">&#39;Torsion&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">Cat</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Metal&#39;</span><span class="p">,</span> <span class="s1">&#39;Polimero&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">rupture_strain</span> <span class="o">&gt;</span> <span class="mf">0.05</span><span class="p">:</span>
+            <span class="n">rupture_strain</span> <span class="o">*=</span> <span class="mf">6.0</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rupture_strain</span> <span class="o">*=</span> <span class="mf">1.3</span>
+
+    <span class="c1"># --- SIMULACIÓN SEGÚN TIPO ---</span>
+    <span class="n">strain_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+    <span class="n">stress_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+    
+    <span class="k">if</span> <span class="n">tipo_ensayo</span> <span class="o">==</span> <span class="s1">&#39;Torsion&#39;</span><span class="p">:</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Nu</span><span class="p">))</span>
+        <span class="n">Ty</span> <span class="o">=</span> <span class="n">Sy</span> <span class="o">*</span> <span class="mf">0.577</span> <span class="c1"># Von Mises</span>
+        <span class="n">Tu</span> <span class="o">=</span> <span class="n">Su</span> <span class="o">*</span> <span class="mf">0.7</span> 
+        <span class="n">is_brittle</span> <span class="o">=</span> <span class="p">(</span><span class="n">Cat</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Ceramico&#39;</span><span class="p">,</span> <span class="s1">&#39;Vidrio&#39;</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">rupture_strain</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">)</span>
+        <span class="n">strain_vec</span><span class="p">,</span> <span class="n">stress_vec</span> <span class="o">=</span> <span class="n">curva_torsion</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">Ty</span><span class="p">,</span> <span class="n">Tu</span><span class="p">,</span> <span class="n">rupture_strain</span><span class="p">,</span> <span class="n">is_brittle</span><span class="p">,</span> <span class="n">puntos</span><span class="p">)</span>
+        
+    <span class="k">elif</span> <span class="n">tipo_ensayo</span> <span class="o">==</span> <span class="s1">&#39;Tension&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">Cat</span> <span class="o">==</span> <span class="s1">&#39;Polimero&#39;</span><span class="p">:</span>
+            <span class="n">strain_vec</span><span class="p">,</span> <span class="n">stress_vec</span> <span class="o">=</span> <span class="n">curva_tension_polimero</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">Sy</span><span class="p">,</span> <span class="n">Su</span><span class="p">,</span> <span class="n">rupture_strain</span><span class="p">,</span> <span class="n">puntos</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">Cat</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Ceramico&#39;</span><span class="p">,</span> <span class="s1">&#39;Vidrio&#39;</span><span class="p">,</span> <span class="s1">&#39;Compuesto&#39;</span><span class="p">]:</span>
+            <span class="n">strain_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">rupture_strain</span><span class="p">,</span> <span class="n">puntos</span><span class="p">)</span>
+            <span class="n">stress_vec</span> <span class="o">=</span> <span class="n">E</span> <span class="o">*</span> <span class="n">strain_vec</span>
+            <span class="n">strain_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">strain_vec</span><span class="p">,</span> <span class="n">rupture_strain</span><span class="o">*</span><span class="mf">1.001</span><span class="p">)</span>
+            <span class="n">stress_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stress_vec</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">strain_vec</span><span class="p">,</span> <span class="n">stress_vec</span> <span class="o">=</span> <span class="n">curva_tension_metal</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">Sy</span><span class="p">,</span> <span class="n">Su</span><span class="p">,</span> <span class="n">rupture_strain</span><span class="p">,</span> <span class="n">puntos</span><span class="p">)</span>
+            
+    <span class="k">elif</span> <span class="n">tipo_ensayo</span> <span class="o">==</span> <span class="s1">&#39;Compresion&#39;</span><span class="p">:</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_strain_machine</span> <span class="o">*</span> <span class="mf">1.2</span><span class="p">,</span> <span class="n">rupture_strain</span><span class="p">)</span>
+        <span class="n">strain_vec</span><span class="p">,</span> <span class="n">stress_vec</span> <span class="o">=</span> <span class="n">curva_compresion</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">Sy</span><span class="p">,</span> <span class="n">Su</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">puntos</span><span class="p">)</span>
+        <span class="n">stress_vec</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        
+    <span class="k">elif</span> <span class="n">tipo_ensayo</span> <span class="o">==</span> <span class="s1">&#39;Flexion&#39;</span><span class="p">:</span>
+        <span class="c1"># Flexión 3 puntos: Usa modelo tracción metal con MOR (Módulo Ruptura)</span>
+        <span class="n">factor_mor</span> <span class="o">=</span> <span class="mf">1.2</span>
+        <span class="n">strain_vec</span><span class="p">,</span> <span class="n">stress_vec</span> <span class="o">=</span> <span class="n">curva_tension_metal</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">Sy</span><span class="p">,</span> <span class="n">Su</span><span class="o">*</span><span class="n">factor_mor</span><span class="p">,</span> <span class="n">rupture_strain</span><span class="p">,</span> <span class="n">puntos</span><span class="p">)</span>
+
+    <span class="c1"># --- RECORTE DE DATOS (CLIPPING) ---</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;e&quot;</span><span class="p">:</span> <span class="n">strain_vec</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">:</span> <span class="n">stress_vec</span><span class="p">})</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;e&quot;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">max_strain_machine</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">())</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    
+    <span class="c1"># Limpieza de bordes si el corte visual quedó muy lejos</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;s&quot;</span><span class="p">]):</span>
+         <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;e&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">max_strain_machine</span> <span class="o">*</span> <span class="mf">1.01</span><span class="p">:</span>
+             <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;e&quot;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">max_strain_machine</span><span class="p">]</span>
+
+    <span class="c1"># Formateo final</span>
+    <span class="n">col_strain</span> <span class="o">=</span> <span class="s2">&quot;Deformacion (rad)&quot;</span> <span class="k">if</span> <span class="n">tipo_ensayo</span> <span class="o">==</span> <span class="s1">&#39;Torsion&#39;</span> <span class="k">else</span> <span class="s2">&quot;Deformacion (mm/mm)&quot;</span>
+    <span class="n">final</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+        <span class="n">col_strain</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;e&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Esfuerzo (MPa)&quot;</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">]</span>
+    <span class="p">})</span>
+    
+    <span class="k">if</span> <span class="n">tipo_ensayo</span> <span class="o">!=</span> <span class="s1">&#39;Torsion&#39;</span><span class="p">:</span> <span class="n">final</span><span class="p">[</span><span class="s2">&quot;Deformacion (%)&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">final</span><span class="p">[</span><span class="n">col_strain</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="k">else</span><span class="p">:</span> <span class="n">final</span><span class="p">[</span><span class="s2">&quot;Deformacion (%)&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">final</span><span class="p">[</span><span class="n">col_strain</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">final</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Equipo de Ingeniería.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
