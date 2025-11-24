@@ -45,8 +45,9 @@
               <p class="caption" role="heading"><span class="caption-text">Manual:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Manual de Usuario</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#nuevas-funcionalidades">Nuevas Funcionalidades</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#flujo-de-trabajo-basico">Flujo de Trabajo Básico</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#inicio-rapido-instalacion">Inicio Rápido (Instalación)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#funcionalidades-principales">Funcionalidades Principales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#flujo-de-trabajo-tipico">Flujo de Trabajo Típico</a></li>
 </ul>
 </li>
 </ul>
@@ -84,9 +85,29 @@
              
   <section id="manual-de-usuario">
 <h1>Manual de Usuario<a class="headerlink" href="#manual-de-usuario" title="Link to this heading"></a></h1>
-<p>Bienvenido a <strong>Labterial v1.2</strong>. Esta guía explica cómo utilizar las herramientas avanzadas de simulación.</p>
-<section id="nuevas-funcionalidades">
-<h2>Nuevas Funcionalidades<a class="headerlink" href="#nuevas-funcionalidades" title="Link to this heading"></a></h2>
+<p>Bienvenido a <strong>Labterial</strong>, tu laboratorio virtual de materiales.</p>
+<section id="inicio-rapido-instalacion">
+<h2>Inicio Rápido (Instalación)<a class="headerlink" href="#inicio-rapido-instalacion" title="Link to this heading"></a></h2>
+<p>Para empezar a utilizar el software en cualquier computadora con Python instalado:</p>
+<ol class="arabic">
+<li><p><strong>Instalar el paquete:</strong>
+Abre tu terminal (consola) y ejecuta el siguiente comando:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>labterial-sim
+</pre></div>
+</div>
+</li>
+<li><p><strong>Iniciar el programa:</strong>
+Una vez instalado, simplemente escribe:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>material-lab
+</pre></div>
+</div>
+<p><em>Esto abrirá automáticamente una pestaña en tu navegador web con la aplicación.</em></p>
+</li>
+</ol>
+<p>—</p>
+</section>
+<section id="funcionalidades-principales">
+<h2>Funcionalidades Principales<a class="headerlink" href="#funcionalidades-principales" title="Link to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p><strong>Simulación de Flexión (3 Puntos):</strong>
 Ahora puedes simular vigas sometidas a flexión.
@@ -96,7 +117,7 @@ Ahora puedes simular vigas sometidas a flexión.
 <li><p><strong>Modo Profesor (Pedagógico):</strong>
 Activa la casilla “Mostrar Explicación Física” en la barra lateral.
 * Verás las ecuaciones exactas usadas (Hooke, Von Mises, Escuadría).
-* Se explicará el fenómeno físico (cizalladura, estricción, etc.).</p></li>
+* Se explicará el fenómeno físico (cizalladura, estricción, etc.) adaptado a cada ensayo.</p></li>
 <li><p><strong>Benchmarking (Comparativa):</strong>
 En la pestaña de simulación, selecciona múltiples materiales.
 * Verás las curvas superpuestas.
@@ -105,15 +126,15 @@ En la pestaña de simulación, selecciona múltiples materiales.
 Usa el selector “SI (MPa)” o “Imperial (ksi)” para cambiar todas las gráficas y tablas instantáneamente.</p></li>
 </ol>
 </section>
-<section id="flujo-de-trabajo-basico">
-<h2>Flujo de Trabajo Básico<a class="headerlink" href="#flujo-de-trabajo-basico" title="Link to this heading"></a></h2>
+<section id="flujo-de-trabajo-tipico">
+<h2>Flujo de Trabajo Típico<a class="headerlink" href="#flujo-de-trabajo-tipico" title="Link to this heading"></a></h2>
 <ol class="arabic simple">
-<li><p><strong>Importar:</strong> Ve a la pestaña <em>Base de Datos</em> y carga tu archivo CSV o usa los datos por defecto.</p></li>
-<li><p><strong>Simular:</strong> Ve a <em>Simulación</em>, elige tus probetas y analiza los resultados.</p></li>
+<li><p><strong>Importar:</strong> Ve a la pestaña <em>Base de Datos</em> y carga tu archivo CSV o usa los datos por defecto que ya vienen incluidos.</p></li>
+<li><p><strong>Simular:</strong> Ve a <em>Simulación</em>, elige tus probetas y analiza los resultados gráficos y numéricos.</p></li>
 <li><p><strong>Exportar:</strong>
 * Usa el icono de cámara en la gráfica para guardar una imagen PNG de alta calidad.
 * Usa el botón “Descargar Datos (CSV)” para obtener los puntos X-Y y procesarlos externamente.
-* Ve a la pestaña <em>Reportes</em> para generar código LaTeX para tu informe.</p></li>
+* Ve a la pestaña <em>Reportes</em> para generar código LaTeX para tu informe o paper.</p></li>
 </ol>
 </section>
 </section>
