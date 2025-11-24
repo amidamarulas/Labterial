@@ -119,70 +119,106 @@ def render_tab_management(df_mats):
         except: pass
 
 def render_math_explainer(dat, modo, units, factor, unit_label, geom_params=None):
-    """
-    Componente del **Modo Profesor**: Renderiza explicaciones físicas dinámicas.
-
-    Se adapta al tipo de ensayo seleccionado para mostrar la teoría pertinente:
+    """Renderiza explicación física detallada paso a paso."""
     
-    *   **Tracción:** Ley de Hooke y Hollomon.
-    *   **Torsión:** Cizalladura, Módulo $G$ y Criterio de Von Mises.
-    *   **Flexión:** Teoría de Euler-Bernoulli, Inercia y Módulo de Ruptura (MOR).
-    *   **Compresión:** Efecto Poisson y ausencia de estricción.
-
-    Args:
-        dat (Series): Propiedades del material seleccionado.
-        modo (str): Tipo de ensayo ('Tension', 'Torsion', etc.).
-        units (str): Sistema de unidades ('SI' o 'Imperial').
-        factor (float): Factor de conversión numérico.
-        unit_label (str): Etiqueta de unidad ('MPa' o 'ksi').
-        geom_params (tuple, optional): Dimensiones (L, b, d) para el cálculo de inercia en flexión.
-    """
     E = dat['elastic_modulus'] * factor
     Sy = dat['yield_strength'] * factor
+    Su = dat['ultimate_strength'] * factor
     
     st.info(f"📘 **Fundamentos Físicos: {modo}**")
     
-    t1, t2 = st.tabs(["1. Mecánica Elástica", "2. Análisis de Falla"])
+    t1, t2 = st.tabs(["1. Mecánica Elástica (Lineal)", "2. Plasticidad y Falla (No Lineal)"])
     
     if modo == "Flexion":
         L, b, d = geom_params if geom_params else (100, 10, 5)
         I = (b * d**3) / 12
+        
         with t1:
             c_txt, c_eq = st.columns([3, 2])
             with c_txt:
-                st.markdown("**Flexión de 3 Puntos:**")
-                st.markdown(f"La pendiente depende de la geometría ($I$). Note que el espesor ($d$) es la variable crítica ($d^3$).")
-                st.caption(f"Inercia I = {I:,.1f} mm⁴")
+                st.markdown("### 📐 Teoría de la Viga (Euler-Bernoulli)")
+                st.markdown("""
+                En la flexión, existe un **Eje Neutro** central sin deformación.
+                *   Fibras superiores: **Compresión**.
+                *   Fibras inferiores: **Tracción**.
+                
+                La resistencia depende de la **Inercia ($I$)**. Nota que el espesor ($d$) está al cubo ($d^3$), por lo que es la variable más crítica.
+                """)
+                st.caption(f"Momento de Inercia: $I = {I:,.1f} \\text{{ mm}}^4$")
             with c_eq:
-                st.markdown("#### Relación Fuerza-Esfuerzo")
-                st.latex(r"F = \frac{2 \cdot \sigma \cdot b \cdot d^2}{3 \cdot L}")
+                st.markdown("#### Esfuerzo Máximo")
+                st.latex(r"\sigma_{max} = \frac{M \cdot c}{I} \Rightarrow \frac{3 \cdot F \cdot L}{2 \cdot b \cdot d^2}")
+                st.markdown("#### Deflexión")
+                st.latex(r"\delta = \frac{F \cdot L^3}{48 \cdot E \cdot I}")
+        
         with t2:
-            st.markdown("**Deflexión ($\delta$):**")
-            st.latex(r"\delta = \frac{\epsilon \cdot L^2}{6 \cdot d}")
+            st.markdown("### 💥 Módulo de Ruptura (MOR)")
+            st.markdown(f"""
+            En flexión, el material resiste una carga aparente mayor (**{1.2*Su:.0f} {unit_label}** vs {Su:.0f} {unit_label}).
+            
+            **¿Por qué?** Solo una capa delgada inferior está bajo tensión máxima, reduciendo la probabilidad estadística de encontrar defectos críticos.
+            """)
 
     elif modo == "Torsion":
-        G = E / (2 * (1 + dat.get('poisson_ratio', 0.3)))
+        Nu = dat.get('poisson_ratio', 0.3)
+        G = E / (2 * (1 + Nu))
+        Ty = Sy * 0.577
+        
         with t1:
-            st.markdown("**Cizalladura:** Deslizamiento de planos atómicos.")
-            st.caption(f"Módulo de Corte G ≈ {G:,.0f} {unit_label}")
-            st.latex(r"\tau = G \cdot \gamma")
+            c_txt, c_eq = st.columns([3, 2])
+            with c_txt:
+                st.markdown("### 🔄 Cizalladura Pura (Shear)")
+                st.markdown("""
+                Deslizamos planos atómicos unos sobre otros. La rigidez la dicta el **Módulo de Cortante ($G$)**.
+                """)
+                st.caption(f"Módulo de Corte: $G \\approx {G:,.0f} \\text{{ {unit_label} }}$")
+            with c_eq:
+                st.markdown("#### Ley de Hooke (Corte)")
+                st.latex(r"\tau = G \cdot \gamma")
+        
         with t2:
-            st.markdown("Criterio de Fluencia (Von Mises):")
-            st.latex(r"\tau_{y} \approx 0.577 \cdot \sigma_{y}")
+            st.markdown("### ⚡ Criterio de Von Mises")
+            st.markdown(f"""
+            La teoría de energía de distorsión predice que el material fluye en corte al **57.7%** de su resistencia a tracción.
+            """)
+            st.latex(r"\tau_{yield} \approx 0.577 \cdot \sigma_{yield}")
+            st.markdown(f"Límite estimado: **{Ty:.0f} {unit_label}**.")
 
     elif modo == "Compresion":
         with t1:
-            st.markdown("**Acortamiento:** El material se ensancha lateralmente (Poisson).")
-            st.latex(r"\sigma = - E \cdot \epsilon")
+            c_txt, c_eq = st.columns([3, 2])
+            with c_txt:
+                st.markdown("### 🧱 Efecto Poisson")
+                st.markdown(f"""
+                Al aplastar, el material se ensancha lateralmente según su Coeficiente de Poisson ($\\nu = {dat.get('poisson_ratio', 0.3)}$).
+                """)
+            with c_eq:
+                st.latex(r"\sigma = - E \cdot \epsilon")
+        
         with t2:
-            st.markdown("Sin estricción, el esfuerzo aparente sube indefinidamente (Abarrilamiento).")
+            st.markdown("### 📈 Ausencia de Fractura")
+            st.markdown("""
+            En materiales dúctiles, no hay estricción. El área aumenta ($A > A_0$), por lo que la pieza se vuelve geométricamente más fuerte y requiere fuerza infinita para aplastarse.
+            """)
 
     else: # Tension
         with t1:
-            st.markdown("**Tracción Uniaxial:** Estiramiento de enlaces.")
-            st.latex(r"\sigma = E \cdot \epsilon")
+            c_txt, c_eq = st.columns([3, 2])
+            with c_txt:
+                st.markdown("### 🔗 Tracción Uniaxial")
+                st.markdown("""
+                Estiramos los enlaces atómicos. La pendiente es la **Rigidez ($E$)**.
+                """)
+                st.caption(f"Rigidez: $E = {E:,.0f} \\text{{ {unit_label} }}$")
+            with c_eq:
+                st.markdown("#### Ley de Hooke")
+                st.latex(r"\sigma = E \cdot \epsilon")
+        
         with t2:
-            st.markdown("Endurecimiento por deformación (Ley de Hollomon):")
+            st.markdown("### 🔨 Plasticidad y Estricción")
+            st.markdown(f"""
+            Al superar **Sy** ({Sy:.0f}), las dislocaciones se mueven. El material se endurece hasta **Su** ({Su:.0f}), luego se forma un cuello y rompe.
+            """)
             st.latex(r"\sigma = K \cdot \epsilon^n")
 
 def render_tab_simulation(df_mats, show_math):
