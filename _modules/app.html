@@ -83,7 +83,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
-<span class="c1"># --- SETUP ---</span>
+<span class="c1"># --- SETUP DE ENTORNO ---</span>
 <span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
 <span class="k">if</span> <span class="n">current_dir</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">current_dir</span><span class="p">)</span>
@@ -107,12 +107,27 @@
 <div class="viewcode-block" id="translate_df">
 <a class="viewcode-back" href="../modules/app.html#app.translate_df">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">translate_df</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Renombra las columnas del DataFrame técnico a nombres legibles para el usuario.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): DataFrame con columnas en snake_case (ej. ``yield_strength``).</span>
+<span class="sd">        </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: DataFrame con columnas en Español (ej. ``Límite Elástico (Sy)``).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">LABEL_MAP</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="configure_page">
 <a class="viewcode-back" href="../modules/app.html#app.configure_page">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">configure_page</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Configura los metadatos iniciales de la aplicación Streamlit.</span>
+<span class="sd">    </span>
+<span class="sd">    Establece el título de la pestaña, el favicon y fuerza el layout &#39;wide&#39;</span>
+<span class="sd">    para una mejor visualización de las gráficas comparativas.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">st</span><span class="o">.</span><span class="n">set_page_config</span><span class="p">(</span><span class="n">page_title</span><span class="o">=</span><span class="s2">&quot;Labterial Edu&quot;</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="s2">&quot;wide&quot;</span><span class="p">,</span> <span class="n">page_icon</span><span class="o">=</span><span class="s2">&quot;🧪&quot;</span><span class="p">)</span>
     <span class="n">st</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;🧪 Labterial: Suite de Ingeniería&quot;</span><span class="p">)</span></div>
 
@@ -120,16 +135,31 @@
 <div class="viewcode-block" id="load_data">
 <a class="viewcode-back" href="../modules/app.html#app.load_data">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_data</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper simple para cargar datos desde el gestor de base de datos.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">get_all_materials</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="render_sidebar">
 <a class="viewcode-back" href="../modules/app.html#app.render_sidebar">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">render_sidebar</span><span class="p">(</span><span class="n">df_raw</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Renderiza la barra lateral de navegación y configuración.</span>
+
+<span class="sd">    Incluye los controles globales como el filtro de categorías y el interruptor</span>
+<span class="sd">    del **Modo Profesor**.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df_raw (pd.DataFrame): El dataset completo de materiales.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: </span>
+<span class="sd">            *   **df_filtered** (pd.DataFrame): Datos filtrados por categoría.</span>
+<span class="sd">            *   **show_math** (bool): Estado del checkbox del Modo Profesor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">st</span><span class="o">.</span><span class="n">sidebar</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="s2">&quot;🔍 Filtros&quot;</span><span class="p">)</span>
     <span class="n">st</span><span class="o">.</span><span class="n">sidebar</span><span class="o">.</span><span class="n">divider</span><span class="p">()</span>
     <span class="n">st</span><span class="o">.</span><span class="n">sidebar</span><span class="o">.</span><span class="n">subheader</span><span class="p">(</span><span class="s2">&quot;👨‍🏫 Modo Profesor&quot;</span><span class="p">)</span>
-    <span class="n">show_math</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">sidebar</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Mostrar Explicación Física&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">show_math</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">sidebar</span><span class="o">.</span><span class="n">checkbox</span><span class="p">(</span><span class="s2">&quot;Mostrar Explicación Física&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Muestra las ecuaciones y conceptos físicos debajo de la simulación.&quot;</span><span class="p">)</span>
     <span class="n">st</span><span class="o">.</span><span class="n">sidebar</span><span class="o">.</span><span class="n">divider</span><span class="p">()</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df_raw</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;category&#39;</span> <span class="ow">in</span> <span class="n">df_raw</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="n">cats</span> <span class="o">=</span> <span class="n">df_raw</span><span class="p">[</span><span class="s1">&#39;category&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -141,6 +171,18 @@
 <div class="viewcode-block" id="render_tab_management">
 <a class="viewcode-back" href="../modules/app.html#app.render_tab_management">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">render_tab_management</span><span class="p">(</span><span class="n">df_mats</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Renderiza la Pestaña 1: Gestión de Inventario.</span>
+
+<span class="sd">    Proporciona herramientas CRUD básicas (Lectura e Inserción):</span>
+<span class="sd">    </span>
+<span class="sd">    *   Tabla interactiva de materiales.</span>
+<span class="sd">    *   Cargador de archivos CSV para importación masiva.</span>
+<span class="sd">    *   Botón de descarga para respaldar la base de datos SQLite local.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df_mats (pd.DataFrame): DataFrame de materiales a mostrar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
     <span class="k">with</span> <span class="n">c1</span><span class="p">:</span>
         <span class="n">st</span><span class="o">.</span><span class="n">subheader</span><span class="p">(</span><span class="s2">&quot;📋 Inventario&quot;</span><span class="p">)</span>
@@ -160,151 +202,106 @@
             <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
             <span class="n">pkg</span> <span class="o">=</span> <span class="n">__package__</span> <span class="k">if</span> <span class="n">__package__</span> <span class="k">else</span> <span class="s1">&#39;labterial&#39;</span>
             <span class="n">db_path</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;.</span><span class="si">{</span><span class="n">pkg</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">/</span> <span class="s2">&quot;materials.db&quot;</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">db_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span> <span class="n">db_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;data&#39;</span> <span class="o">/</span> <span class="s1">&#39;materials.db&#39;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">db_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span> 
+                <span class="n">db_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;data&#39;</span> <span class="o">/</span> <span class="s1">&#39;materials.db&#39;</span>
+            
             <span class="k">if</span> <span class="n">db_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">db_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">download_button</span><span class="p">(</span><span class="s2">&quot;💾 Backup BD&quot;</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="s2">&quot;materials.db&quot;</span><span class="p">)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">db_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+                    <span class="n">st</span><span class="o">.</span><span class="n">download_button</span><span class="p">(</span><span class="s2">&quot;💾 Backup BD&quot;</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="s2">&quot;materials.db&quot;</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span> <span class="k">pass</span></div>
 
 
-<span class="c1"># --- FUNCIÓN PEDAGÓGICA EXPANDIDA ---</span>
 <div class="viewcode-block" id="render_math_explainer">
 <a class="viewcode-back" href="../modules/app.html#app.render_math_explainer">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">render_math_explainer</span><span class="p">(</span><span class="n">dat</span><span class="p">,</span> <span class="n">modo</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">factor</span><span class="p">,</span> <span class="n">unit_label</span><span class="p">,</span> <span class="n">geom_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Componente del **Modo Profesor**: Renderiza explicaciones físicas dinámicas.</span>
+
+<span class="sd">    Se adapta al tipo de ensayo seleccionado para mostrar la teoría pertinente:</span>
+<span class="sd">    </span>
+<span class="sd">    *   **Tracción:** Ley de Hooke y Hollomon.</span>
+<span class="sd">    *   **Torsión:** Cizalladura, Módulo $G$ y Criterio de Von Mises.</span>
+<span class="sd">    *   **Flexión:** Teoría de Euler-Bernoulli, Inercia y Módulo de Ruptura (MOR).</span>
+<span class="sd">    *   **Compresión:** Efecto Poisson y ausencia de estricción.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dat (Series): Propiedades del material seleccionado.</span>
+<span class="sd">        modo (str): Tipo de ensayo (&#39;Tension&#39;, &#39;Torsion&#39;, etc.).</span>
+<span class="sd">        units (str): Sistema de unidades (&#39;SI&#39; o &#39;Imperial&#39;).</span>
+<span class="sd">        factor (float): Factor de conversión numérico.</span>
+<span class="sd">        unit_label (str): Etiqueta de unidad (&#39;MPa&#39; o &#39;ksi&#39;).</span>
+<span class="sd">        geom_params (tuple, optional): Dimensiones (L, b, d) para el cálculo de inercia en flexión.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">E</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;elastic_modulus&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">factor</span>
     <span class="n">Sy</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;yield_strength&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">factor</span>
-    <span class="n">Su</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;ultimate_strength&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">factor</span>
     
-    <span class="n">st</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📘 **Análisis Físico-Matemático Detallado: </span><span class="si">{</span><span class="n">modo</span><span class="si">}</span><span class="s2">**&quot;</span><span class="p">)</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📘 **Fundamentos Físicos: </span><span class="si">{</span><span class="n">modo</span><span class="si">}</span><span class="s2">**&quot;</span><span class="p">)</span>
     
-    <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">tabs</span><span class="p">([</span><span class="s2">&quot;1. Mecánica Elástica (Lineal)&quot;</span><span class="p">,</span> <span class="s2">&quot;2. Plasticidad y Falla (No Lineal)&quot;</span><span class="p">])</span>
+    <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">tabs</span><span class="p">([</span><span class="s2">&quot;1. Mecánica Elástica&quot;</span><span class="p">,</span> <span class="s2">&quot;2. Análisis de Falla&quot;</span><span class="p">])</span>
     
     <span class="k">if</span> <span class="n">modo</span> <span class="o">==</span> <span class="s2">&quot;Flexion&quot;</span><span class="p">:</span>
         <span class="n">L</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">geom_params</span> <span class="k">if</span> <span class="n">geom_params</span> <span class="k">else</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-        <span class="c1"># Inercia rectangular</span>
         <span class="n">I</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span> <span class="o">*</span> <span class="n">d</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mi">12</span>
-        
         <span class="k">with</span> <span class="n">t1</span><span class="p">:</span>
             <span class="n">c_txt</span><span class="p">,</span> <span class="n">c_eq</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
             <span class="k">with</span> <span class="n">c_txt</span><span class="p">:</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;### 📐 Teoría de la Viga (Euler-Bernoulli)&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">                En la flexión, el material no se estira uniformemente. Existe un **Eje Neutro** en el centro que no sufre deformación.</span>
-<span class="s2">                *   Las fibras superiores se **comprimen**.</span>
-<span class="s2">                *   Las fibras inferiores se **traccionan**.</span>
-<span class="s2">                </span>
-<span class="s2">                La resistencia depende de la **Inercia ($I$)**, que es la oposición geométrica a rotar. Nota que la altura ($d$) está elevada al cubo ($d^3$), por lo que aumentar el espesor es la forma más eficiente de ganar rigidez.</span>
-<span class="s2">                &quot;&quot;&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">caption</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Momento de Inercia calculado: $I = </span><span class="si">{</span><span class="n">I</span><span class="si">:</span><span class="s2">,.1f</span><span class="si">}</span><span class="s2"> </span><span class="se">\\</span><span class="s2">text</span><span class="se">{{</span><span class="s2"> mm</span><span class="se">}}</span><span class="s2">^4$&quot;</span><span class="p">)</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;**Flexión de 3 Puntos:**&quot;</span><span class="p">)</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;La pendiente depende de la geometría ($I$). Note que el espesor ($d$) es la variable crítica ($d^3$).&quot;</span><span class="p">)</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">caption</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Inercia I = </span><span class="si">{</span><span class="n">I</span><span class="si">:</span><span class="s2">,.1f</span><span class="si">}</span><span class="s2"> mm⁴&quot;</span><span class="p">)</span>
             <span class="k">with</span> <span class="n">c_eq</span><span class="p">:</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;#### Esfuerzo Máximo (Fórmula de la Escuadría)&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\sigma_</span><span class="si">{max}</span><span class="s2"> = \frac{M \cdot c}</span><span class="si">{I}</span><span class="s2"> \Rightarrow \frac{3 \cdot F \cdot L}{2 \cdot b \cdot d^2}&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;#### Deflexión Máxima&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\delta = \frac{F \cdot L^3}{48 \cdot E \cdot I}&quot;</span><span class="p">)</span>
-        
+                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;#### Relación Fuerza-Esfuerzo&quot;</span><span class="p">)</span>
+                <span class="n">st</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;F = \frac{2 \cdot \sigma \cdot b \cdot d^2}{3 \cdot L}&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">t2</span><span class="p">:</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;### 💥 Módulo de Ruptura (MOR)&quot;</span><span class="p">)</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">            Aunque el material es el mismo que en tracción, en flexión suele aguantar una carga aparente mayor (**</span><span class="si">{</span><span class="mf">1.2</span><span class="o">*</span><span class="n">Su</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">unit_label</span><span class="si">}</span><span class="s2">** vs </span><span class="si">{</span><span class="n">Su</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">unit_label</span><span class="si">}</span><span class="s2">).</span>
-<span class="s2">            </span>
-<span class="s2">            **¿Por qué?** En tracción pura, todo el volumen está al límite, así que cualquier defecto interno causa la falla. </span>
-<span class="s2">            En flexión, solo una &quot;piel&quot; delgada inferior está al esfuerzo máximo, reduciendo estadísticamente la probabilidad de que un defecto crítico esté justo ahí (Mecánica de Fractura Probabilística).</span>
-<span class="s2">            </span>
-<span class="s2">            **La Caída Final:** La gráfica baja porque se inicia una grieta en la cara inferior que se propaga hacia arriba, reduciendo la sección efectiva de la viga ($d$ disminuye).</span>
-<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;**Deflexión ($\delta$):**&quot;</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\delta = \frac{\epsilon \cdot L^2}{6 \cdot d}&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">modo</span> <span class="o">==</span> <span class="s2">&quot;Torsion&quot;</span><span class="p">:</span>
-        <span class="n">Nu</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;poisson_ratio&#39;</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
-        <span class="n">G</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Nu</span><span class="p">))</span>
-        <span class="n">Ty</span> <span class="o">=</span> <span class="n">Sy</span> <span class="o">*</span> <span class="mf">0.577</span>
-        
+        <span class="n">G</span> <span class="o">=</span> <span class="n">E</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">dat</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;poisson_ratio&#39;</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)))</span>
         <span class="k">with</span> <span class="n">t1</span><span class="p">:</span>
-            <span class="n">c_txt</span><span class="p">,</span> <span class="n">c_eq</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-            <span class="k">with</span> <span class="n">c_txt</span><span class="p">:</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;### 🔄 Cizalladura Pura (Shear)&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">                Imagina el material como un mazo de cartas. En torsión, no estamos separando las cartas (tracción), sino **deslizándolas** unas sobre otras.</span>
-<span class="s2">                </span>
-<span class="s2">                La rigidez que gobierna esto no es $E$, sino el **Módulo de Cortante ($G$)**. Para materiales isotrópicos, $G$ está matemáticamente ligado a $E$ a través del Coeficiente de Poisson ($</span><span class="se">\\</span><span class="s2">nu$).</span>
-<span class="s2">                &quot;&quot;&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">caption</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Relación Elástica: $G </span><span class="se">\\</span><span class="s2">approx 0.38 E$ (para metales típicos)&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;**Calculado:** $G = </span><span class="si">{</span><span class="n">G</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> </span><span class="se">\\</span><span class="s2">text</span><span class="se">{{</span><span class="s2"> </span><span class="si">{</span><span class="n">unit_label</span><span class="si">}</span><span class="s2"> </span><span class="se">}}</span><span class="s2">$&quot;</span><span class="p">)</span>
-            <span class="k">with</span> <span class="n">c_eq</span><span class="p">:</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;#### Ley de Hooke (Corte)&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\tau = G \cdot \gamma&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">                * $</span><span class="se">\\</span><span class="s2">tau$: Esfuerzo Cortante</span>
-<span class="s2">                * $G$: Módulo de Rigidez</span>
-<span class="s2">                * $\gamma$: Deformación Angular</span>
-<span class="s2">                &quot;&quot;&quot;</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;**Cizalladura:** Deslizamiento de planos atómicos.&quot;</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">caption</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Módulo de Corte G ≈ </span><span class="si">{</span><span class="n">G</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">unit_label</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\tau = G \cdot \gamma&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">t2</span><span class="p">:</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;### ⚡ Criterio de Falla de Von Mises&quot;</span><span class="p">)</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">            ¿Cuándo deja de ser elástico el material si lo retuerces?</span>
-<span class="s2">            La **Teoría de la Energía de Distorsión** (Von Mises) establece que el material fluye cuando la energía de deformación alcanza un límite crítico.</span>
-<span class="s2">            </span>
-<span class="s2">            Matemáticamente, esto predice que la resistencia al corte es el **57.7%** de la resistencia a la tracción.</span>
-<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\tau_</span><span class="si">{yield}</span><span class="s2"> = \frac{\sigma_</span><span class="si">{yield}</span><span class="s2">}{\sqrt</span><span class="si">{3}</span><span class="s2">} \approx 0.577 \cdot \sigma_</span><span class="si">{yield}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Por eso, tu límite elástico estimado baja de **</span><span class="si">{</span><span class="n">Sy</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">** a **</span><span class="si">{</span><span class="n">Ty</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">unit_label</span><span class="si">}</span><span class="s2">**.&quot;</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;Criterio de Fluencia (Von Mises):&quot;</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\tau_</span><span class="si">{y}</span><span class="s2"> \approx 0.577 \cdot \sigma_</span><span class="si">{y}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">modo</span> <span class="o">==</span> <span class="s2">&quot;Compresion&quot;</span><span class="p">:</span>
         <span class="k">with</span> <span class="n">t1</span><span class="p">:</span>
-            <span class="n">c_txt</span><span class="p">,</span> <span class="n">c_eq</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-            <span class="k">with</span> <span class="n">c_txt</span><span class="p">:</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;### 🧱 Efecto Poisson y Fricción&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">                Al aplastar el material, los átomos se acercan. Por conservación de volumen (aproximada), el material trata de expandirse hacia los lados.</span>
-<span class="s2">                </span>
-<span class="s2">                El **Coeficiente de Poisson ($</span><span class="se">\\</span><span class="s2">nu = </span><span class="si">{</span><span class="n">dat</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;poisson_ratio&#39;</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3</span><span class="p">)</span><span class="si">}</span><span class="s2">$)** dicta qué tanto se &quot;engorda&quot; la probeta.</span>
-<span class="s2">                * $</span><span class="se">\\</span><span class="s2">nu = 0.5$: Volumen constante (Gomas).</span>
-<span class="s2">                * $</span><span class="se">\\</span><span class="s2">nu = 0.3$: Metales típicos.</span>
-<span class="s2">                * $</span><span class="se">\\</span><span class="s2">nu = 0.0$: Corcho (no se ensancha).</span>
-<span class="s2">                &quot;&quot;&quot;</span><span class="p">)</span>
-            <span class="k">with</span> <span class="n">c_eq</span><span class="p">:</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;#### Ley Constitutiva&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\sigma_</span><span class="si">{axial}</span><span class="s2"> = - E \cdot \epsilon_</span><span class="si">{axial}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\epsilon_</span><span class="si">{transversal}</span><span class="s2"> = - \nu \cdot \epsilon_</span><span class="si">{axial}</span><span class="s2">&quot;</span><span class="p">)</span>
-        
+            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;**Acortamiento:** El material se ensancha lateralmente (Poisson).&quot;</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\sigma = - E \cdot \epsilon&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">t2</span><span class="p">:</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;### 📈 ¿Por qué no baja la gráfica?&quot;</span><span class="p">)</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">            A diferencia de la tracción, donde se forma un cuello que debilita la pieza (**Estricción**), en compresión ocurre lo contrario: el **Abarrilamiento**.</span>
-<span class="s2">            </span>
-<span class="s2">            1.  El área transversal aumenta ($A &gt; A_0$).</span>
-<span class="s2">            2.  Como $\sigma = F/A_0$ (Esfuerzo Ingenieril), y el material real se vuelve más denso y fuerte por endurecimiento, la máquina necesita cada vez más fuerza.</span>
-<span class="s2">            3.  No hay un punto de inestabilidad geométrica en materiales dúctiles; simplemente se aplastan hasta ser una lámina.</span>
-<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;Sin estricción, el esfuerzo aparente sube indefinidamente (Abarrilamiento).&quot;</span><span class="p">)</span>
 
-    <span class="k">else</span><span class="p">:</span> <span class="c1"># Tension (Tracción)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c1"># Tension</span>
         <span class="k">with</span> <span class="n">t1</span><span class="p">:</span>
-            <span class="n">c_txt</span><span class="p">,</span> <span class="n">c_eq</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-            <span class="k">with</span> <span class="n">c_txt</span><span class="p">:</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;### 🔗 Fuerzas Interatómicas&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">                En la zona lineal, estamos estirando los enlaces químicos (metálicos, covalentes) sin romperlos. Es como estirar millones de resortes microscópicos.</span>
-<span class="s2">                </span>
-<span class="s2">                La pendiente de esta recta, el **Módulo de Young ($E$)**, es una medida directa de la fuerza de esos enlaces químicos. Por eso el Tungsteno (enlaces fuertes) tiene un $E$ alto y los polímeros (enlaces débiles) un $E$ bajo.</span>
-<span class="s2">                &quot;&quot;&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">caption</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rigidez medida: $E = </span><span class="si">{</span><span class="n">E</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> </span><span class="se">\\</span><span class="s2">text</span><span class="se">{{</span><span class="s2"> </span><span class="si">{</span><span class="n">unit_label</span><span class="si">}</span><span class="s2"> </span><span class="se">}}</span><span class="s2">$&quot;</span><span class="p">)</span>
-            <span class="k">with</span> <span class="n">c_eq</span><span class="p">:</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;#### Ley de Hooke Uniaxial&quot;</span><span class="p">)</span>
-                <span class="n">st</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\sigma = E \cdot \epsilon&quot;</span><span class="p">)</span>
-        
+            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;**Tracción Uniaxial:** Estiramiento de enlaces.&quot;</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\sigma = E \cdot \epsilon&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">t2</span><span class="p">:</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;### 🔨 Dislocaciones y Endurecimiento&quot;</span><span class="p">)</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">            Cuando pasamos el límite **Sy** (</span><span class="si">{</span><span class="n">Sy</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">unit_label</span><span class="si">}</span><span class="s2">), ocurren deslizamientos irreversibles en la estructura cristalina (movimiento de dislocaciones).</span>
-<span class="s2">            </span>
-<span class="s2">            **Endurecimiento por Deformación:** Curiosamente, deformar el metal lo hace más fuerte al principio (la curva sube). Las dislocaciones se &quot;enredan&quot; entre sí, dificultando el movimiento posterior.</span>
-<span class="s2">            </span>
-<span class="s2">            **Estricción (Necking):** Al llegar a **Su** (</span><span class="si">{</span><span class="n">Su</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">unit_label</span><span class="si">}</span><span class="s2">), el endurecimiento ya no puede compensar la reducción de área. Se forma un cuello local y la carga cae hasta la fractura.</span>
-<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
-            <span class="n">st</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\sigma_</span><span class="si">{plastica}</span><span class="s2"> = K \cdot \epsilon^n&quot;</span><span class="p">)</span></div>
+            <span class="n">st</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="s2">&quot;Endurecimiento por deformación (Ley de Hollomon):&quot;</span><span class="p">)</span>
+            <span class="n">st</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\sigma = K \cdot \epsilon^n&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="render_tab_simulation">
 <a class="viewcode-back" href="../modules/app.html#app.render_tab_simulation">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">render_tab_simulation</span><span class="p">(</span><span class="n">df_mats</span><span class="p">,</span> <span class="n">show_math</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Renderiza la Pestaña 2: Laboratorio Virtual (Núcleo de la App).</span>
+
+<span class="sd">    Esta función orquesta toda la lógica de simulación e interacción:</span>
+<span class="sd">    </span>
+<span class="sd">    1.  **Configuración:** Selectores de unidades, materiales y modo de ensayo.</span>
+<span class="sd">    2.  **Simulación:** Llama al motor físico ``physics.py`` para generar datos.</span>
+<span class="sd">    3.  **Visualización:**</span>
+<span class="sd">        *   Genera gráficas interactivas con Plotly.</span>
+<span class="sd">        *   Maneja la lógica especial para **Flexión** (convierte Esfuerzo $\to$ Fuerza).</span>
+<span class="sd">        *   Maneja la conversión de unidades (MPa $\to$ ksi).</span>
+<span class="sd">    4.  **Exportación:** Botones para descargar la gráfica (PNG) y los datos (CSV).</span>
+<span class="sd">    5.  **Benchmarking:** Genera gráficas de barras comparativas al final.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df_mats (pd.DataFrame): Materiales disponibles.</span>
+<span class="sd">        show_math (bool): Flag para mostrar/ocultar el panel educativo.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">df_mats</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span> <span class="n">st</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Sin datos.&quot;</span><span class="p">);</span> <span class="k">return</span>
     <span class="n">st</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="s2">&quot;🔬 Laboratorio Virtual&quot;</span><span class="p">)</span>
     <span class="n">col_ctrl</span><span class="p">,</span> <span class="n">col_plot</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
@@ -315,7 +312,7 @@
         <span class="n">units</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">radio</span><span class="p">(</span><span class="s2">&quot;Unidades&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;SI (MPa)&quot;</span><span class="p">,</span> <span class="s2">&quot;Imperial (ksi)&quot;</span><span class="p">],</span> <span class="n">horizontal</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">is_imperial</span> <span class="o">=</span> <span class="s2">&quot;Imperial&quot;</span> <span class="ow">in</span> <span class="n">units</span>
         <span class="n">unit_label</span> <span class="o">=</span> <span class="s2">&quot;ksi&quot;</span> <span class="k">if</span> <span class="n">is_imperial</span> <span class="k">else</span> <span class="s2">&quot;MPa&quot;</span>
-        <span class="n">factor</span> <span class="o">=</span> <span class="n">MPA_TO_KSI</span> <span class="k">if</span> <span class="n">is_imperial</span> <span class="k">else</span> <span class="mf">6.5</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="n">MPA_TO_KSI</span> <span class="k">if</span> <span class="n">is_imperial</span> <span class="k">else</span> <span class="mf">1.0</span>
         
         <span class="n">st</span><span class="o">.</span><span class="n">divider</span><span class="p">()</span>
         <span class="n">mats_avail</span> <span class="o">=</span> <span class="n">df_mats</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
@@ -325,6 +322,7 @@
         <span class="n">modo</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">radio</span><span class="p">(</span><span class="s2">&quot;Ensayo&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;Tension&quot;</span><span class="p">,</span> <span class="s2">&quot;Compresion&quot;</span><span class="p">,</span> <span class="s2">&quot;Torsion&quot;</span><span class="p">,</span> <span class="s2">&quot;Flexion&quot;</span><span class="p">])</span>
         
         <span class="n">slider_max_def</span> <span class="o">=</span> <span class="mf">15.0</span>
+        
         <span class="k">if</span> <span class="n">modo</span> <span class="o">==</span> <span class="s2">&quot;Flexion&quot;</span><span class="p">:</span>
             <span class="n">st</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;📏 Geometría (mm)&quot;</span><span class="p">)</span>
             <span class="n">c_L</span><span class="p">,</span> <span class="n">c_dim</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -333,7 +331,7 @@
                 <span class="n">b_val</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Ancho (b)&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">20.0</span><span class="p">)</span>
                 <span class="n">d_val</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">number_input</span><span class="p">(</span><span class="s2">&quot;Espesor (d)&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
             <span class="n">geom</span> <span class="o">=</span> <span class="p">(</span><span class="n">L_val</span><span class="p">,</span> <span class="n">b_val</span><span class="p">,</span> <span class="n">d_val</span><span class="p">)</span>
-            <span class="n">slider_max_def</span> <span class="o">=</span> <span class="mf">5.0</span>
+            <span class="n">slider_max_def</span> <span class="o">=</span> <span class="mf">5.0</span> 
         
         <span class="n">lbl</span> <span class="o">=</span> <span class="s2">&quot;Límite Carrera (%)&quot;</span> <span class="k">if</span> <span class="p">(</span><span class="n">modo</span><span class="o">!=</span><span class="s2">&quot;Torsion&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;Ángulo (rad)&quot;</span>
         <span class="n">max_v</span> <span class="o">=</span> <span class="mf">40.0</span> <span class="k">if</span> <span class="n">modo</span><span class="o">!=</span><span class="s2">&quot;Torsion&quot;</span> <span class="k">else</span> <span class="mf">6.5</span>
@@ -349,19 +347,25 @@
             <span class="n">dat</span> <span class="o">=</span> <span class="n">df_mats</span><span class="p">[</span><span class="n">df_mats</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">mat</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">props</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">dat</span><span class="p">);</span> <span class="n">props</span><span class="p">[</span><span class="s1">&#39;category&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;category&#39;</span><span class="p">,</span> <span class="s1">&#39;Metal&#39;</span><span class="p">)</span>
             
+            <span class="c1"># Llamada al motor físico</span>
             <span class="n">df_sim</span> <span class="o">=</span> <span class="n">simular_ensayo</span><span class="p">(</span><span class="n">props</span><span class="p">,</span> <span class="n">modo</span><span class="p">,</span> <span class="n">max_strain_machine</span><span class="o">=</span><span class="n">limit</span><span class="p">)</span>
             
+            <span class="c1"># Lógica de visualización dinámica</span>
             <span class="k">if</span> <span class="n">modo</span> <span class="o">==</span> <span class="s2">&quot;Flexion&quot;</span><span class="p">:</span>
-                <span class="n">sigma_si</span> <span class="o">=</span> <span class="n">df_sim</span><span class="p">[</span><span class="s2">&quot;Esfuerzo (MPa)&quot;</span><span class="p">]</span>
-                <span class="n">epsilon_si</span> <span class="o">=</span> <span class="n">df_sim</span><span class="p">[</span><span class="s2">&quot;Deformacion (mm/mm)&quot;</span><span class="p">]</span>
-                <span class="n">F_val</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sigma_si</span> <span class="o">*</span> <span class="n">b_val</span> <span class="o">*</span> <span class="p">(</span><span class="n">d_val</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">L_val</span><span class="p">)</span>
-                <span class="n">Delta_val</span> <span class="o">=</span> <span class="p">(</span><span class="n">epsilon_si</span> <span class="o">*</span> <span class="p">(</span><span class="n">L_val</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">6</span> <span class="o">*</span> <span class="n">d_val</span><span class="p">)</span>
+                <span class="c1"># Conversión especial para Flexión: Esfuerzo -&gt; Fuerza</span>
+                <span class="n">sigma</span> <span class="o">=</span> <span class="n">df_sim</span><span class="p">[</span><span class="s2">&quot;Esfuerzo (MPa)&quot;</span><span class="p">]</span>
+                <span class="n">epsilon</span> <span class="o">=</span> <span class="n">df_sim</span><span class="p">[</span><span class="s2">&quot;Deformacion (mm/mm)&quot;</span><span class="p">]</span>
+                <span class="n">F_val</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">b_val</span> <span class="o">*</span> <span class="p">(</span><span class="n">d_val</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">L_val</span><span class="p">)</span>
+                <span class="n">Delta_val</span> <span class="o">=</span> <span class="p">(</span><span class="n">epsilon</span> <span class="o">*</span> <span class="p">(</span><span class="n">L_val</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">6</span> <span class="o">*</span> <span class="n">d_val</span><span class="p">)</span>
+                
                 <span class="n">x_vals</span> <span class="o">=</span> <span class="n">Delta_val</span><span class="p">;</span> <span class="n">y_vals</span> <span class="o">=</span> <span class="n">F_val</span>
                 <span class="n">x_title</span> <span class="o">=</span> <span class="s2">&quot;Deflexión (mm)&quot;</span><span class="p">;</span> <span class="n">y_title</span> <span class="o">=</span> <span class="s2">&quot;Fuerza (N)&quot;</span>
+                
                 <span class="k">if</span> <span class="n">is_imperial</span><span class="p">:</span>
                     <span class="n">x_vals</span> <span class="o">*=</span> <span class="mf">0.0393701</span><span class="p">;</span> <span class="n">y_vals</span> <span class="o">*=</span> <span class="mf">0.224809</span>
                     <span class="n">x_title</span> <span class="o">=</span> <span class="s2">&quot;Deflexión (in)&quot;</span><span class="p">;</span> <span class="n">y_title</span> <span class="o">=</span> <span class="s2">&quot;Fuerza (lbf)&quot;</span>
             <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Conversión estándar de unidades</span>
                 <span class="n">y_vals</span> <span class="o">=</span> <span class="n">df_sim</span><span class="p">[</span><span class="s2">&quot;Esfuerzo (MPa)&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">factor</span>
                 <span class="n">x_col</span> <span class="o">=</span> <span class="s2">&quot;Deformacion (%)&quot;</span> <span class="k">if</span> <span class="n">modo</span><span class="o">!=</span><span class="s2">&quot;Torsion&quot;</span> <span class="k">else</span> <span class="s2">&quot;Deformacion (rad)&quot;</span>
                 <span class="n">x_vals</span> <span class="o">=</span> <span class="n">df_sim</span><span class="p">[</span><span class="n">x_col</span><span class="p">]</span>
@@ -373,10 +377,14 @@
             <span class="n">df_tmp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">x_title</span><span class="p">:</span> <span class="n">x_vals</span><span class="p">,</span> <span class="n">y_title</span><span class="p">:</span> <span class="n">y_vals</span><span class="p">,</span> <span class="s1">&#39;Material&#39;</span><span class="p">:</span> <span class="n">mat</span><span class="p">})</span>
             <span class="n">export_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_tmp</span><span class="p">)</span>
 
-        <span class="n">title_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Tension&quot;</span><span class="p">:</span> <span class="s2">&quot;Tracción&quot;</span><span class="p">,</span> <span class="s2">&quot;Compresion&quot;</span><span class="p">:</span> <span class="s2">&quot;Compresión&quot;</span><span class="p">,</span> <span class="s2">&quot;Torsion&quot;</span><span class="p">:</span> <span class="s2">&quot;Torsión&quot;</span><span class="p">,</span> <span class="s2">&quot;Flexion&quot;</span><span class="p">:</span> <span class="s2">&quot;Ensayo de Flexión&quot;</span><span class="p">}</span>
-        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title_map</span><span class="p">[</span><span class="n">modo</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">xaxis_title</span><span class="o">=</span><span class="n">x_title</span><span class="p">,</span> <span class="n">yaxis_title</span><span class="o">=</span><span class="n">y_title</span><span class="p">,</span> 
+        <span class="n">t_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Tension&quot;</span><span class="p">:</span> <span class="s2">&quot;Tracción&quot;</span><span class="p">,</span> <span class="s2">&quot;Compresion&quot;</span><span class="p">:</span> <span class="s2">&quot;Compresión&quot;</span><span class="p">,</span> <span class="s2">&quot;Torsion&quot;</span><span class="p">:</span> <span class="s2">&quot;Torsión&quot;</span><span class="p">,</span> <span class="s2">&quot;Flexion&quot;</span><span class="p">:</span> <span class="s2">&quot;Ensayo de Flexión&quot;</span><span class="p">}</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Curvas (</span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">) - </span><span class="si">{</span><span class="n">t_map</span><span class="p">[</span><span class="n">modo</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> 
+                          <span class="n">xaxis_title</span><span class="o">=</span><span class="n">x_title</span><span class="p">,</span> <span class="n">yaxis_title</span><span class="o">=</span><span class="n">y_title</span><span class="p">,</span> 
                           <span class="n">hovermode</span><span class="o">=</span><span class="s2">&quot;x unified&quot;</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s2">&quot;plotly_white&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Zoom inteligente</span>
         <span class="k">if</span> <span class="n">modo</span> <span class="o">!=</span> <span class="s2">&quot;Flexion&quot;</span><span class="p">:</span> <span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">slider</span><span class="p">])</span>
+        
         <span class="n">st</span><span class="o">.</span><span class="n">plotly_chart</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">use_container_width</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="n">export_data</span><span class="p">:</span>
@@ -386,8 +394,9 @@
         <span class="k">if</span> <span class="n">show_math</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">sel</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">render_math_explainer</span><span class="p">(</span><span class="n">df_mats</span><span class="p">[</span><span class="n">df_mats</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">sel</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">modo</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">factor</span><span class="p">,</span> <span class="n">unit_label</span><span class="p">,</span> <span class="n">geom</span><span class="p">)</span>
             
+        <span class="c1"># Sección Benchmarking</span>
         <span class="n">st</span><span class="o">.</span><span class="n">divider</span><span class="p">()</span>
-        <span class="n">st</span><span class="o">.</span><span class="n">subheader</span><span class="p">(</span><span class="s2">&quot;📊 Benchmarking&quot;</span><span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">subheader</span><span class="p">(</span><span class="s2">&quot;📊 Benchmarking (Comparativa)&quot;</span><span class="p">)</span>
         <span class="n">df_sub</span> <span class="o">=</span> <span class="n">df_mats</span><span class="p">[</span><span class="n">df_mats</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">sel</span><span class="p">)]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">opts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;yield_strength&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Resistencia (Sy)&quot;</span><span class="p">,</span> <span class="s2">&quot;elastic_modulus&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Rigidez (E)&quot;</span><span class="p">,</span> <span class="s2">&quot;density&quot;</span><span class="p">:</span> <span class="s2">&quot;Densidad&quot;</span><span class="p">,</span> <span class="s2">&quot;cost&quot;</span><span class="p">:</span> <span class="s2">&quot;Costo&quot;</span><span class="p">}</span>
         <span class="n">opts</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">opts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">df_sub</span><span class="o">.</span><span class="n">columns</span><span class="p">}</span>
@@ -403,6 +412,15 @@
 <div class="viewcode-block" id="render_tab_reports">
 <a class="viewcode-back" href="../modules/app.html#app.render_tab_reports">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">render_tab_reports</span><span class="p">(</span><span class="n">df_mats</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Renderiza la Pestaña 3: Reportes.</span>
+
+<span class="sd">    Permite generar tablas personalizadas filtrando materiales y propiedades,</span>
+<span class="sd">    con opciones de exportación a CSV (Excel) y código LaTeX para papers.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df_mats (pd.DataFrame): DataFrame base.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">st</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="s2">&quot;📑 Reportes&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">df_mats</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span> <span class="k">return</span>
     <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">columns</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -419,6 +437,12 @@
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../modules/app.html#app.main">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Punto de entrada principal (Main Loop).</span>
+<span class="sd">    </span>
+<span class="sd">    Inicializa la página, carga los datos, renderiza el sidebar y</span>
+<span class="sd">    gestiona el sistema de pestañas de la aplicación.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">configure_page</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span> <span class="n">df_raw</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">()</span>
     <span class="k">except</span><span class="p">:</span> <span class="k">return</span>

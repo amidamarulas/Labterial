@@ -86,7 +86,25 @@
 <dl class="py function" id="module-cli">
 <dt class="sig sig-object py" id="cli.main">
 <span class="sig-prename descclassname"><span class="pre">cli.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cli.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cli.main" title="Link to this definition"></a></dt>
-<dd><p>Punto de entrada para el comando de consola.</p>
+<dd><p>Punto de entrada principal de la aplicación para la línea de comandos.</p>
+<p>Esta función se ejecuta cuando el usuario escribe <code class="docutils literal notranslate"><span class="pre">material-lab</span></code> en su terminal
+después de instalar el paquete.</p>
+<p><strong>Funcionamiento Técnico:</strong></p>
+<p>Como Streamlit no es una librería estándar de Python que se ejecuta simplemente importándola,
+este script actúa como un “Lanzador” (Launcher):</p>
+<ol class="arabic simple">
+<li><p><strong>Localización:</strong> Encuentra dinámicamente la ruta absoluta donde se instaló
+el paquete <code class="docutils literal notranslate"><span class="pre">labterial</span></code> en el sistema operativo del usuario.</p></li>
+<li><p><strong>Enrutamiento:</strong> Construye la ruta hacia el archivo <code class="docutils literal notranslate"><span class="pre">app.py</span></code> interno.</p></li>
+<li><p><strong>Inyección de Argumentos:</strong> Manipula <code class="docutils literal notranslate"><span class="pre">sys.argv</span></code> para simular que el usuario
+escribió manualmente: <code class="docutils literal notranslate"><span class="pre">streamlit</span> <span class="pre">run</span> <span class="pre">/ruta/de/instalacion/app.py</span></code>.</p></li>
+<li><p><strong>Delegación:</strong> Pasa el control al ejecutable interno de Streamlit (<code class="docutils literal notranslate"><span class="pre">stcli.main()</span></code>).</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Este método permite distribuir aplicaciones de Streamlit como paquetes de PyPI
+estándar sin obligar al usuario a conocer la ubicación de los archivos.</p>
+</div>
 </dd></dl>
 
 </section>

@@ -83,12 +83,39 @@
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../modules/cli.html#cli.main">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Punto de entrada para el comando de consola.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Punto de entrada principal de la aplicación para la línea de comandos.</span>
+
+<span class="sd">    Esta función se ejecuta cuando el usuario escribe ``material-lab`` en su terminal</span>
+<span class="sd">    después de instalar el paquete.</span>
+
+<span class="sd">    **Funcionamiento Técnico:**</span>
+
+<span class="sd">    Como Streamlit no es una librería estándar de Python que se ejecuta simplemente importándola,</span>
+<span class="sd">    este script actúa como un &quot;Lanzador&quot; (Launcher):</span>
+
+<span class="sd">    1.  **Localización:** Encuentra dinámicamente la ruta absoluta donde se instaló</span>
+<span class="sd">        el paquete ``labterial`` en el sistema operativo del usuario.</span>
+<span class="sd">    2.  **Enrutamiento:** Construye la ruta hacia el archivo ``app.py`` interno.</span>
+<span class="sd">    3.  **Inyección de Argumentos:** Manipula ``sys.argv`` para simular que el usuario</span>
+<span class="sd">        escribió manualmente: ``streamlit run /ruta/de/instalacion/app.py``.</span>
+<span class="sd">    4.  **Delegación:** Pasa el control al ejecutable interno de Streamlit (``stcli.main()``).</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Este método permite distribuir aplicaciones de Streamlit como paquetes de PyPI</span>
+<span class="sd">        estándar sin obligar al usuario a conocer la ubicación de los archivos.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># 1. Encontrar el directorio donde vive este archivo (dentro de site-packages)</span>
     <span class="n">package_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+    
+    <span class="c1"># 2. Apuntar al archivo de la GUI</span>
     <span class="n">app_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">package_dir</span><span class="p">,</span> <span class="s2">&quot;app.py&quot;</span><span class="p">)</span>
     
-    <span class="c1"># Inyectamos el comando como si el usuario lo hubiera escrito</span>
+    <span class="c1"># 3. Construir el comando simulado</span>
+    <span class="c1"># sys.argv[0] es el nombre del programa, los siguientes son argumentos</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;streamlit&quot;</span><span class="p">,</span> <span class="s2">&quot;run&quot;</span><span class="p">,</span> <span class="n">app_path</span><span class="p">]</span>
+    
+    <span class="c1"># 4. Ejecutar Streamlit</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">stcli</span><span class="o">.</span><span class="n">main</span><span class="p">())</span></div>
 
 

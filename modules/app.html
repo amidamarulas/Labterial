@@ -96,47 +96,144 @@ la función <code class="xref py py-func docutils literal notranslate"><span cla
 <dl class="py function" id="module-app">
 <dt class="sig sig-object py" id="app.configure_page">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">configure_page</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app.html#configure_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.configure_page" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Configura los metadatos iniciales de la aplicación Streamlit.</p>
+<p>Establece el título de la pestaña, el favicon y fuerza el layout ‘wide’
+para una mejor visualización de las gráficas comparativas.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.load_data">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app.html#load_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.load_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Wrapper simple para cargar datos desde el gestor de base de datos.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.main">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.main" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Punto de entrada principal (Main Loop).</p>
+<p>Inicializa la página, carga los datos, renderiza el sidebar y
+gestiona el sistema de pestañas de la aplicación.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.render_math_explainer">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">render_math_explainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geom_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app.html#render_math_explainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.render_math_explainer" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Componente del <strong>Modo Profesor</strong>: Renderiza explicaciones físicas dinámicas.</p>
+<p>Se adapta al tipo de ensayo seleccionado para mostrar la teoría pertinente:</p>
+<ul class="simple">
+<li><p><strong>Tracción:</strong> Ley de Hooke y Hollomon.</p></li>
+<li><p><strong>Torsión:</strong> Cizalladura, Módulo $G$ y Criterio de Von Mises.</p></li>
+<li><p><strong>Flexión:</strong> Teoría de Euler-Bernoulli, Inercia y Módulo de Ruptura (MOR).</p></li>
+<li><p><strong>Compresión:</strong> Efecto Poisson y ausencia de estricción.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dat</strong> (<em>Series</em>) – Propiedades del material seleccionado.</p></li>
+<li><p><strong>modo</strong> (<em>str</em>) – Tipo de ensayo (‘Tension’, ‘Torsion’, etc.).</p></li>
+<li><p><strong>units</strong> (<em>str</em>) – Sistema de unidades (‘SI’ o ‘Imperial’).</p></li>
+<li><p><strong>factor</strong> (<em>float</em>) – Factor de conversión numérico.</p></li>
+<li><p><strong>unit_label</strong> (<em>str</em>) – Etiqueta de unidad (‘MPa’ o ‘ksi’).</p></li>
+<li><p><strong>geom_params</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Dimensiones (L, b, d) para el cálculo de inercia en flexión.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.render_sidebar">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">render_sidebar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_raw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app.html#render_sidebar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.render_sidebar" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Renderiza la barra lateral de navegación y configuración.</p>
+<p>Incluye los controles globales como el filtro de categorías y el interruptor
+del <strong>Modo Profesor</strong>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df_raw</strong> (<em>pd.DataFrame</em>) – El dataset completo de materiales.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>df_filtered</strong> (pd.DataFrame): Datos filtrados por categoría.</p></li>
+<li><p><strong>show_math</strong> (bool): Estado del checkbox del Modo Profesor.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.render_tab_management">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">render_tab_management</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_mats</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app.html#render_tab_management"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.render_tab_management" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Renderiza la Pestaña 1: Gestión de Inventario.</p>
+<p>Proporciona herramientas CRUD básicas (Lectura e Inserción):</p>
+<ul class="simple">
+<li><p>Tabla interactiva de materiales.</p></li>
+<li><p>Cargador de archivos CSV para importación masiva.</p></li>
+<li><p>Botón de descarga para respaldar la base de datos SQLite local.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df_mats</strong> (<em>pd.DataFrame</em>) – DataFrame de materiales a mostrar.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.render_tab_reports">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">render_tab_reports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_mats</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app.html#render_tab_reports"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.render_tab_reports" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Renderiza la Pestaña 3: Reportes.</p>
+<p>Permite generar tablas personalizadas filtrando materiales y propiedades,
+con opciones de exportación a CSV (Excel) y código LaTeX para papers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df_mats</strong> (<em>pd.DataFrame</em>) – DataFrame base.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.render_tab_simulation">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">render_tab_simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_mats</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_math</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app.html#render_tab_simulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.render_tab_simulation" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Renderiza la Pestaña 2: Laboratorio Virtual (Núcleo de la App).</p>
+<p>Esta función orquesta toda la lógica de simulación e interacción:</p>
+<ol class="arabic simple">
+<li><p><strong>Configuración:</strong> Selectores de unidades, materiales y modo de ensayo.</p></li>
+<li><p><strong>Simulación:</strong> Llama al motor físico <code class="docutils literal notranslate"><span class="pre">physics.py</span></code> para generar datos.</p></li>
+<li><p><strong>Visualización:</strong>
+*   Genera gráficas interactivas con Plotly.
+*   Maneja la lógica especial para <strong>Flexión</strong> (convierte Esfuerzo $    o$ Fuerza).
+*   Maneja la conversión de unidades (MPa $     o$ ksi).</p></li>
+<li><p><strong>Exportación:</strong> Botones para descargar la gráfica (PNG) y los datos (CSV).</p></li>
+<li><p><strong>Benchmarking:</strong> Genera gráficas de barras comparativas al final.</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_mats</strong> (<em>pd.DataFrame</em>) – Materiales disponibles.</p></li>
+<li><p><strong>show_math</strong> (<em>bool</em>) – Flag para mostrar/ocultar el panel educativo.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.translate_df">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">translate_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/app.html#translate_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.translate_df" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Renombra las columnas del DataFrame técnico a nombres legibles para el usuario.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – DataFrame con columnas en snake_case (ej. <code class="docutils literal notranslate"><span class="pre">yield_strength</span></code>).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame con columnas en Español (ej. <code class="docutils literal notranslate"><span class="pre">Límite</span> <span class="pre">Elástico</span> <span class="pre">(Sy)</span></code>).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 

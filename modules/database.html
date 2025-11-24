@@ -88,19 +88,63 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="database_mgr.get_all_materials">
 <span class="sig-prename descclassname"><span class="pre">database_mgr.</span></span><span class="sig-name descname"><span class="pre">get_all_materials</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database_mgr.html#get_all_materials"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database_mgr.get_all_materials" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Recupera el inventario completo de la base de datos.</p>
+<p>Llama internamente a <a class="reference internal" href="#database_mgr.init_db" title="database_mgr.init_db"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_db()</span></code></a> para asegurar que la base de datos exista antes de leer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Un DataFrame de Pandas que contiene todas las columnas de la tabla <code class="docutils literal notranslate"><span class="pre">materials</span></code>.
+Ideal para ser renderizado directamente por <code class="docutils literal notranslate"><span class="pre">st.dataframe</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="database_mgr.init_db">
 <span class="sig-prename descclassname"><span class="pre">database_mgr.</span></span><span class="sig-name descname"><span class="pre">init_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database_mgr.html#init_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database_mgr.init_db" title="Link to this definition"></a></dt>
-<dd><p>Inicializa la DB con esquema MECÁNICO (sin costo/densidad).
-Carga datos semilla si está vacía.</p>
+<dd><p>Inicializa la infraestructura de la base de datos SQLite.</p>
+<p>Esta función es idempotente (se puede llamar muchas veces sin causar errores).
+Realiza el siguiente flujo de trabajo:</p>
+<ol class="arabic simple">
+<li><p><strong>Verificación de Directorio:</strong> Comprueba si existe la carpeta oculta <code class="docutils literal notranslate"><span class="pre">.labterial</span></code> en el directorio <em>home</em> del usuario. Si no, la crea.</p></li>
+<li><p><strong>Conexión/Creación:</strong> Conecta con el archivo SQLite. Si no existe, SQLite lo crea automáticamente.</p></li>
+<li><p><strong>Definición de Esquema (DDL):</strong> Ejecuta la sentencia <code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">TABLE</span> <span class="pre">IF</span> <span class="pre">NOT</span> <span class="pre">EXISTS</span></code> para asegurar que la tabla <code class="docutils literal notranslate"><span class="pre">materials</span></code> tenga la estructura correcta.</p></li>
+<li><p><strong>Semilla de Datos (Seeding):</strong> Si la base de datos está vacía (conteo = 0), busca el archivo <code class="docutils literal notranslate"><span class="pre">materials_seed.csv</span></code> dentro de los recursos del paquete e inserta los materiales por defecto.</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sqlite3.Error</strong> – Si hay problemas de permisos de escritura en el disco.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="database_mgr.insert_from_dataframe">
 <span class="sig-prename descclassname"><span class="pre">database_mgr.</span></span><span class="sig-name descname"><span class="pre">insert_from_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/database_mgr.html#insert_from_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database_mgr.insert_from_dataframe" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Importación masiva segura desde un DataFrame externo (ej. CSV subido por usuario).</p>
+<p>Realiza validaciones de estructura antes de intentar la inserción SQL para evitar
+errores de base de datos parciales.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – DataFrame de entrada. Debe contener al menos las columnas obligatorias:
+<code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">category</span></code>, <code class="docutils literal notranslate"><span class="pre">elastic_modulus</span></code>, <code class="docutils literal notranslate"><span class="pre">yield_strength</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>Una tupla con tres valores <code class="docutils literal notranslate"><span class="pre">(added,</span> <span class="pre">ignored,</span> <span class="pre">error_msg)</span></code>:</p>
+<ul class="simple">
+<li><p><strong>added (int):</strong> Cantidad de materiales insertados exitosamente.</p></li>
+<li><p><strong>ignored (int):</strong> Cantidad de materiales ignorados porque el nombre ya existía (Constraint UNIQUE).</p></li>
+<li><p><strong>error_msg (str|None):</strong> Mensaje de error si faltan columnas o hay problemas de datos. <code class="docutils literal notranslate"><span class="pre">None</span></code> si el proceso corrió bien.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 
