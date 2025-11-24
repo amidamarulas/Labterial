@@ -217,7 +217,7 @@ def render_tab_simulation(df_mats, show_math):
         units = st.radio("Unidades", ["SI (MPa)", "Imperial (ksi)"], horizontal=True)
         is_imperial = "Imperial" in units
         unit_label = "ksi" if is_imperial else "MPa"
-        factor = MPA_TO_KSI if is_imperial else 1.0
+        factor = MPA_TO_KSI if is_imperial else 6.5
         
         st.divider()
         mats_avail = df_mats['name'].unique()
@@ -238,7 +238,7 @@ def render_tab_simulation(df_mats, show_math):
             slider_max_def = 5.0
         
         lbl = "Límite Carrera (%)" if (modo!="Torsion") else "Ángulo (rad)"
-        max_v = 40.0 if modo!="Torsion" else 1.0
+        max_v = 40.0 if modo!="Torsion" else 6.5
         slider = st.slider(lbl, 0.1, max_v, slider_max_def)
         limit = slider/100 if modo!="Torsion" else slider
 
